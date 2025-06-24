@@ -1,15 +1,16 @@
 package com.mycompany.oficina.ordemservico;
 
-import com.mycompany.oficina.*;
-import com.mycompany.oficina.agendamento.TipoServico;
 import java.util.ArrayList;
-import java.util.Date;
+
 import com.mycompany.oficina.entidades.*;
 import com.mycompany.oficina.loja.Produto;
 import java.time.LocalDateTime;
 import java.util.List;
-import com.mycompany.oficina.ObserverOS.*;
-import com.mycompany.oficina.stateOS.*;
+
+import com.mycompany.oficina.ordemservico.ObserverOS.Assunto;
+import com.mycompany.oficina.ordemservico.ObserverOS.Observador;
+import com.mycompany.oficina.ordemservico.stateOS.EstadoAguardando;
+import com.mycompany.oficina.ordemservico.stateOS.EstadoOS;
 
 public class OrdemDeServico implements Assunto {
 

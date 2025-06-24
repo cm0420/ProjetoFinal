@@ -181,7 +181,7 @@ public class Carro implements Entidades {
     @Override
     public String getIdentificador(){
     
-    return this.getPlaca();
+    return this.getChassi();
     
     }
 

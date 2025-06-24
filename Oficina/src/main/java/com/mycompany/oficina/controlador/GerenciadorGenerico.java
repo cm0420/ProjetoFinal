@@ -28,7 +28,7 @@ public class GerenciadorGenerico<T extends Entidades> {
 
     public T buscarPorIdentificador(String Identificador) {
         for (T item : lista) {
-            if (item.getIdentificador().equals(item)) {
+            if (item.getIdentificador().equals(Identificador)) {
                 return item;
             }
         }
