@@ -96,6 +96,9 @@ public final class AgendaOficina {
         }
         return Arrays.copyOf(horariosOriginais, horariosOriginais.length);
     }
+    public Set<LocalDate> getDatasAgendadas() {
+        return Collections.unmodifiableSet(agenda.keySet());
+    }
 
     private int converterHoraParaIndice(LocalDateTime dataHora) {
         int hora = dataHora.getHour();
