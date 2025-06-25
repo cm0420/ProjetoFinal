@@ -1,4 +1,4 @@
-package com.mycompany.oficina.controlador;
+package com.mycompany.oficina.utilidades;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -9,7 +9,7 @@ package com.mycompany.oficina.controlador;
  *
  * @author Miguel
  */
-public class FormatodorCpf {
+public class FormatadorCpf {
 
    /**
  * Anonimiza um número de CPF, substituindo os primeiros dígitos por asteriscos,

@@ -23,6 +23,12 @@ public class Navegador {
            Menu menu = pilhaDeMenus.pop();
         }
     }
+    public void exibirMenuAtual() {
+        if (!this.pilhaDeMenus.isEmpty()) {
+            // Usa .peek() para olhar o item do topo sem remove lo
+            this.pilhaDeMenus.peek().exibirMenu();
+        }
+    }
     public boolean pilhaVazia() {
         return pilhaDeMenus.isEmpty();
     }

@@ -15,7 +15,7 @@ public class Produto {
     private double preco; // Preço do produto
     private int quantidade; // Quantidade disponível em estoque
     private String fornecedor; // Nome do fornecedor do produto
-    
+
     /**
      * Construtor parametrizado para criar um novo produto.
      * 
@@ -30,13 +30,10 @@ public class Produto {
         this.preco = preco;
         this.fornecedor = fornecedor;
         this.quantidade = quantidade;
+
     }
 
-    /**
-     * Construtor padrão para criar um produto sem inicializar os atributos.
-     */
-    public Produto() { // construtor padrão 
-    }
+
     
     /**
      * Retorna o contador de produtos.

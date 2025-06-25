@@ -8,11 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * @author Mariaa
  */
 public class Estoque {
-     private List<Produto> produtos;
+    private List<Produto> produtos;
 
     public Estoque(ArrayList<Produto> produtos) {
         this.produtos = new ArrayList<>();
@@ -20,9 +19,8 @@ public class Estoque {
 
     public Estoque() {
     }
-    
+
     /**
-     *
      * @return
      */
     public List<Produto> getProdutos() {
@@ -95,9 +93,9 @@ public class Estoque {
     /**
      * Edita os dados de um produto identificado pelo ID.
      *
-     * @param idProduto ID do produto a editar
-     * @param novoNome Novo nome do produto
-     * @param novoPreco Novo preço
+     * @param idProduto      ID do produto a editar
+     * @param novoNome       Novo nome do produto
+     * @param novoPreco      Novo preço
      * @param novaQuantidade Nova quantidade
      * @param novoFornecedor Novo fornecedor
      * @return true se o produto foi encontrado e atualizado, false se não encontrado
@@ -128,5 +126,5 @@ public class Estoque {
         }
         return false;
     }
-    
+
 }

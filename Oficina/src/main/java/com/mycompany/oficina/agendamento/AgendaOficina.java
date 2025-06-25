@@ -2,6 +2,7 @@ package com.mycompany.oficina.agendamento;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -66,6 +67,35 @@ public final class AgendaOficina {
         horariosDoDia[indice] = agendamento;
         System.out.println("SUCESSO: Agendamento realizado para " + data);
         return true;
+    }
+    public boolean cancelarAgendamento(Agendamento agendamento) {
+        if (agendamento == null) {
+            return false;
+        }
+
+        LocalDateTime dataHora = agendamento.getDataHora();
+        LocalDate data = dataHora.toLocalDate();
+
+        // Pega o array de horários para o dia do agendamento
+        Agendamento[] horariosDoDia = agenda.get(data);
+        if (horariosDoDia == null) {
+            // Se não há agendamentos para este dia, não há o que cancelar.
+            return false;
+        }
+
+        int indice = converterHoraParaIndice(dataHora);
+        if (indice == -1 || horariosDoDia[indice] == null) {
+            // Se o horário é inválido ou já está vago, não há o que cancelar.
+            return false;
+        }
+
+        // Confirma se o agendamento na agenda é exatamente o mesmo que queremos remover
+        if (horariosDoDia[indice].equals(agendamento)) {
+            horariosDoDia[indice] = null; // Remove o agendamento, definindo o slot como nulo
+            return true; // Sucesso!
+        }
+
+        return false; // O agendamento encontrado não era o esperado
     }
 
     /**
