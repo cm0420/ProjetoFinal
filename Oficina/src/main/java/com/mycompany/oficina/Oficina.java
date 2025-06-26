@@ -4,36 +4,24 @@
 package com.mycompany.oficina;
 
 import com.mycompany.oficina.agendamento.*;
-import com.mycompany.oficina.comparators.AgendamentoComparator;
 import com.mycompany.oficina.controlador.GerenciadorCarros;
 import com.mycompany.oficina.controlador.GerenciadorCliente;
 import com.mycompany.oficina.controlador.GerenciadorFuncionario;
 import com.mycompany.oficina.entidades.Carro;
 import com.mycompany.oficina.entidades.Cliente;
 import com.mycompany.oficina.entidades.Funcionario;
-import com.mycompany.oficina.interpreter.*; // Importe o pacote do interpreter
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 
-import com.mycompany.oficina.Menus.MenuMecanico;
 import com.mycompany.oficina.Menus.MenuPrincipal;
 import com.mycompany.oficina.Menus.Navegador;
-import com.mycompany.oficina.agendamento.*;
-import com.mycompany.oficina.controlador.*;
-import com.mycompany.oficina.entidades.*;
-import com.mycompany.oficina.interpreter.*;
 import com.mycompany.oficina.loja.Estoque;
 import com.mycompany.oficina.loja.Produto;
 import com.mycompany.oficina.ordemservico.GerenciadorOrdemDeServico;
-import com.mycompany.oficina.segurança.ServicoAutenticacao;
-import com.mycompany.oficina.segurança.Sessao;
+import com.mycompany.oficina.seguranca.ServicoAutenticacao;
+import com.mycompany.oficina.seguranca.*;
+import com.mycompany.oficina.sistemaponto.GerenciadorPonto;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -45,6 +33,7 @@ public class Oficina {
     private static final GerenciadorCarros gerenciadorCarros = new GerenciadorCarros();
     private static final GerenciadorOrdemDeServico gerenciadorOS = new GerenciadorOrdemDeServico();
     private static final ServicoAutenticacao servicoAutenticacao = new ServicoAutenticacao(gerenciadorFuncionario);
+    private static GerenciadorPonto gerenciadorPonto;
 
     // --- CAMADA DE DADOS EM MEMÓRIA ---
     private static final AgendaOficina agenda = new AgendaOficina();
@@ -204,7 +193,8 @@ public class Oficina {
                     System.out.println("==============================================");
                     // Empilha o primeiro menu na pilha de navegação após o login
                     // Injeta as dependências necessárias no construtor do MenuPrincipal
-                    Navegador.getInstance().navegarPara(new MenuPrincipal(agenda, estoque, gerenciadorOS,gerenciadorCliente, gerenciadorCarros, gerenciadorFuncionario));
+                    Navegador.getInstance().navegarPara(new MenuPrincipal(agenda, estoque, gerenciadorOS,gerenciadorCliente,
+                            gerenciadorCarros, gerenciadorFuncionario, gerenciadorPonto));
                 } else {
                     System.out.println(">>> ERRO: CPF ou senha inválidos. Tente novamente.");
                 }
@@ -216,6 +206,7 @@ public class Oficina {
                     Sessao.getInstance().logout();
                     System.out.println("Você saiu do sistema. Até logo!");
                     System.out.println("==============================================");
+                    break;
                 } else {
                     // Exibe o menu que está no topo da pilha
                     Navegador.getInstance().exibirMenuAtual();
@@ -231,12 +222,12 @@ public class Oficina {
         System.out.println("[Sistema] Populando dados iniciais para demonstração...");
 
         // Funcionários
-        Funcionario gerente = gerenciadorFuncionario.criarFuncionario("admin123", "Gerente", "Ana Silva", "111", "9999-0001", "Rua A", "ana@oficina.com");
+        Funcionario gerente = gerenciadorFuncionario.criarFuncionario("admin123", "Atendente", "Ana Silva", "1234567891011", "9999-0001", "Rua A", "ana@oficina.com");
         Funcionario meca1 = gerenciadorFuncionario.criarFuncionario("mec456", "Mecanico", "Carlos Souza", "222", "9999-0002", "Rua B", "carlos@oficina.com");
 
         // Clientes
-        Cliente cli1 = gerenciadorCliente.addCliente("João Pereira", "123.456", "8888-0001", "Rua C", "joao@cliente.com");
-
+        Cliente cli1 = gerenciadorCliente.addCliente("João Pereira", "1234567891011", "38999204008", "Rua C", "joao@cliente.com");
+        Cliente cli2 = gerenciadorCliente.addCliente("João Pereira", "1234567891011", "38999204008", "Rua C", "joao@cliente.com");
         // Carros
         Carro carro1 = gerenciadorCarros.cadastrarCarro(cli1, "VW", "Gol", "ABC-1234", "chassi1");
 
@@ -246,7 +237,9 @@ public class Oficina {
 
         // Agendamentos para hoje, para que o mecânico possa testar
         Agendamento ag1 = new Agendamento(cli1, carro1, meca1, TipoServico.REPARO, null, LocalDateTime.now().withHour(10).withMinute(0));
+        Agendamento ag2 = new Agendamento(cli1, carro1, meca1, TipoServico.REPARO, null, LocalDateTime.now().withHour(11).withMinute(0));
         agenda.agendar(ag1);
+        agenda.agendar(ag2);
 
         System.out.println("[Sistema] Dados populados. Aplicação pronta.\n");
 

@@ -2,11 +2,14 @@ package com.mycompany.oficina.Menus;
 
 import com.mycompany.oficina.agendamento.AgendaOficina;
 import com.mycompany.oficina.agendamento.Agendamento;
+import com.mycompany.oficina.entidades.Funcionario;
 import com.mycompany.oficina.loja.Estoque;
 import com.mycompany.oficina.loja.Produto;
 import com.mycompany.oficina.ordemservico.GerenciadorOrdemDeServico;
 import com.mycompany.oficina.ordemservico.OrdemDeServico;
-import com.mycompany.oficina.segurança.Sessao;
+import com.mycompany.oficina.seguranca.Sessao;
+import com.mycompany.oficina.sistemaponto.GerenciadorPonto;
+import com.mycompany.oficina.sistemaponto.RegistroPonto;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -21,33 +24,32 @@ import java.util.stream.Collectors;
 public class MenuMecanico implements Menu {
 
     // Dependências necessárias para o menu funcionar
+    // Dependências
     private final GerenciadorOrdemDeServico gerenciadorOS;
     private final AgendaOficina agenda;
     private final Estoque estoque;
+    private final GerenciadorPonto gerenciadorPonto; // Dependência para o ponto
 
-    // Ferramentas do menu
+    // Ferramentas
     private final Scanner scanner;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     /**
-     * Construtor que recebe as dependências necessárias.
-     * @param agenda A agenda de agendamentos do sistema.
-     * @param estoque O estoque de peças da loja.
-     * @param gerenciadorOS O gerenciador das Ordens de Serviço.
+     * Construtor atualizado para incluir o GerenciadorPonto.
      */
-    public MenuMecanico(AgendaOficina agenda, Estoque estoque, GerenciadorOrdemDeServico gerenciadorOS) {
+    public MenuMecanico(AgendaOficina agenda, Estoque estoque, GerenciadorOrdemDeServico gerenciadorOS, GerenciadorPonto gerenciadorPonto) {
         this.agenda = agenda;
         this.estoque = estoque;
         this.gerenciadorOS = gerenciadorOS;
+        this.gerenciadorPonto = gerenciadorPonto;
         this.scanner = new Scanner(System.in);
     }
 
     @Override
     public void exibirMenu() {
-        // Ponto de verificação de segurança
         if (!"Mecanico".equals(Sessao.getInstance().getCargoUsuarioLogado())) {
-            System.out.println("Acesso negado. Esta área é restrita aos mecânicos.");
-            Navegador.getInstance().voltarPara(); // Volta para o menu anterior
+            System.out.println("Acesso negado.");
+            Navegador.getInstance().voltarPara();
             return;
         }
 
@@ -56,26 +58,24 @@ public class MenuMecanico implements Menu {
             System.out.println("\n--- (Acesso Mecânico) BEM-VINDO, " + Sessao.getInstance().getUsuarioLogado().getNome() + " ---");
             System.out.println("1. Ver Agendamentos e Iniciar Nova OS");
             System.out.println("2. Gerenciar OS Existente");
+            System.out.println("3. Registrar Ponto"); // <-- NOVA OPÇÃO
             System.out.println("0. Voltar ao Menu Principal (Logout)");
             System.out.print("Escolha uma opção: ");
 
-            int opcao;
-            try {
-                opcao = Integer.parseInt(scanner.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.println("Opção inválida. Por favor, digite um número.");
-                continue;
-            }
+            String opcao = scanner.nextLine();
 
             switch(opcao) {
-                case 1:
+                case "1":
                     iniciarOSDeAgendamento();
                     break;
-                case 2:
+                case "2":
                     gerenciarOSExistente();
                     break;
-                case 0:
-                    executando = false; // Finaliza o loop e volta
+                case "3": // <-- NOVO CASE
+                    menuPonto();
+                    break;
+                case "0":
+                    executando = false;
                     break;
                 default:
                     System.out.println("Opção inválida.");
@@ -84,15 +84,55 @@ public class MenuMecanico implements Menu {
         Navegador.getInstance().voltarPara();
     }
 
-    /**
-     * Exibe os agendamentos do dia e permite iniciar uma OS a partir de um deles.
-     */
+    // --- NOVO METODO: MENU DE PONTO ---
+    private void menuPonto() {
+        Funcionario funcionarioLogado = Sessao.getInstance().getUsuarioLogado();
+
+        boolean noMenuPonto = true;
+        while(noMenuPonto) {
+            System.out.println("\n--- Sistema de Registro de Ponto ---");
+            System.out.println("1. Bater Ponto de ENTRADA");
+            System.out.println("2. Bater Ponto de SAÍDA");
+            System.out.println("3. Ver Meus Registros de Hoje");
+            System.out.println("0. Voltar ao Menu do Mecânico");
+            System.out.print("Escolha uma opção: ");
+
+            switch(scanner.nextLine()) {
+                case "1":
+                    gerenciadorPonto.baterPontoEntrada(funcionarioLogado);
+                    break;
+                case "2":
+                    gerenciadorPonto.baterPontoSaida(funcionarioLogado);
+                    break;
+                case "3":
+                    System.out.println("\n--- Meus Registros de Ponto de Hoje ---");
+                    List<RegistroPonto> meusRegistros = gerenciadorPonto.getRegistrosPorFuncionario(funcionarioLogado);
+                    List<RegistroPonto> registrosDeHoje = meusRegistros.stream()
+                            .filter(r -> r.getDataHoraEntrada().toLocalDate().isEqual(LocalDate.now()))
+                            .collect(Collectors.toList());
+
+                    if(registrosDeHoje.isEmpty()){
+                        System.out.println("Nenhum registro encontrado para hoje.");
+                    } else {
+                        registrosDeHoje.forEach(System.out::println);
+                    }
+                    break;
+                case "0":
+                    noMenuPonto = false;
+                    break;
+                default:
+                    System.out.println("Opção inválida.");
+            }
+        }
+    }
+
+    // --- MÉTODOS EXISTENTES (sem alterações) ---
+
     private void iniciarOSDeAgendamento() {
         System.out.println("\n--- Agendamentos do Dia ---");
         LocalDate hoje = LocalDate.now();
         List<Agendamento> agendamentosDoDia = new ArrayList<>();
 
-        // Coleta agendamentos não nulos do dia
         for(Agendamento ag : agenda.getHorariosDoDia(hoje)) {
             if (ag != null) agendamentosDoDia.add(ag);
         }
@@ -102,7 +142,6 @@ public class MenuMecanico implements Menu {
             return;
         }
 
-        // Exibe os agendamentos para seleção
         for (int i = 0; i < agendamentosDoDia.size(); i++) {
             Agendamento ag = agendamentosDoDia.get(i);
             System.out.printf("%d. %s - Cliente: %s - Veículo: %s (%s)\n",
@@ -123,7 +162,6 @@ public class MenuMecanico implements Menu {
             System.out.print("Digite o defeito relatado pelo cliente: ");
             String defeito = scanner.nextLine();
 
-            // Chama a camada de lógica para criar a OS, associando o mecânico logado
             OrdemDeServico novaOS = gerenciadorOS.abrirOS(
                     agSelecinado.getCliente(),
                     agSelecinado.getCarro(),
@@ -133,18 +171,15 @@ public class MenuMecanico implements Menu {
 
             if (novaOS != null) {
                 System.out.println("Ordem de Serviço " + novaOS.getNumeroOS() + " aberta com sucesso!");
-                exibirSubMenuDaOS(novaOS); // Navega para gerenciar a OS recém-criada
+                exibirSubMenuDaOS(novaOS);
             } else {
-                System.out.println("Falha ao abrir a Ordem de Serviço. Verifique os dados.");
+                System.out.println("Falha ao abrir a Ordem de Serviço.");
             }
         } else if (escolha != 0) {
             System.out.println("Seleção inválida.");
         }
     }
 
-    /**
-     * Lista todas as OS existentes e permite selecionar uma para gerenciar.
-     */
     private void gerenciarOSExistente() {
         System.out.println("\n--- Gerenciar OS Existente ---");
         List<OrdemDeServico> listaOS = gerenciadorOS.listarTodas();
@@ -154,10 +189,9 @@ public class MenuMecanico implements Menu {
             return;
         }
 
-        // Filtra para não mostrar OS já finalizadas ou canceladas neste menu
         List<OrdemDeServico> osAtivas = listaOS.stream()
                 .filter(os -> !os.getStatusAtual().equals("Finalizada") && !os.getStatusAtual().equals("Cancelada"))
-                .collect(Collectors.toList());
+                .toList();
 
         if (osAtivas.isEmpty()) {
             System.out.println("Nenhuma Ordem de Serviço ativa para gerenciar.");
@@ -183,10 +217,6 @@ public class MenuMecanico implements Menu {
         }
     }
 
-    /**
-     * Exibe um submenu de ações para uma OS específica, baseado em seu estado atual.
-     * @param os A Ordem de Serviço a ser gerenciada.
-     */
     private void exibirSubMenuDaOS(OrdemDeServico os) {
         boolean gerenciando = true;
         while(gerenciando) {
@@ -207,8 +237,8 @@ public class MenuMecanico implements Menu {
                 case "Finalizada":
                 case "Cancelada":
                     System.out.println("Esta OS não pode mais ser alterada.");
-                    System.out.println(os.gerarExtrato()); // Apenas mostra o extrato final
-                    return; // Sai do submenu
+                    System.out.println(os.gerarExtrato());
+                    return;
             }
             System.out.println("9. Ver Extrato Atual");
             System.out.println("0. Voltar");
@@ -223,17 +253,10 @@ public class MenuMecanico implements Menu {
                 System.out.println(os.gerarExtrato());
                 continue;
             }
-
             processarAcaoDaOS(os, status, opcao);
         }
     }
 
-    /**
-     * Processa a ação escolhida pelo mecânico para a OS, delegando a chamada ao objeto OS.
-     * @param os A Ordem de Serviço.
-     * @param status O status atual da OS.
-     * @param opcao A opção escolhida pelo usuario.
-     */
     private void processarAcaoDaOS(OrdemDeServico os, String status, int opcao) {
         switch (status) {
             case "Aguardando":
@@ -243,7 +266,7 @@ public class MenuMecanico implements Menu {
                 if (opcao == 1) os.iniciarServico();
                 break;
             case "Em Serviço":
-                if (opcao == 1) { // Adicionar Peça
+                if (opcao == 1) {
                     System.out.println("\n--- Peças em Estoque ---");
                     estoque.listarProdutos().forEach(p -> System.out.printf("ID: %s | %s | Qtd: %d\n", p.getIdProduto(), p.getNome(), p.getQuantidade()));
                     System.out.print("Digite o ID da peça: ");
@@ -252,11 +275,11 @@ public class MenuMecanico implements Menu {
                     if (p != null) {
                         System.out.print("Digite a quantidade: ");
                         int qtd = Integer.parseInt(scanner.nextLine());
-                        os.adicionarPeca(p, qtd); // A lógica de estoque está na classe EstadoEmServico
+                        os.adicionarPeca(p, qtd);
                     } else {
                         System.out.println("Produto não encontrado.");
                     }
-                } else if (opcao == 2) { // Finalizar Serviço
+                } else if (opcao == 2) {
                     os.finalizarServico();
                     System.out.println("\n>>> Serviço Finalizado com Sucesso! <<<");
                     System.out.println("O valor fixo de mão de obra foi somado ao custo das peças.");

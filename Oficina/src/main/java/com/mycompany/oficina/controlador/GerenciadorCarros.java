@@ -2,7 +2,6 @@ package com.mycompany.oficina.controlador;
 
 import com.mycompany.oficina.entidades.Carro;
 import com.mycompany.oficina.entidades.Cliente;
-import java.util.ArrayList;
 
 /**
  * Classe responsável pelo gerenciamento dos carros da oficina.

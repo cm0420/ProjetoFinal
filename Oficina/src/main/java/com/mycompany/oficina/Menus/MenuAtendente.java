@@ -12,7 +12,7 @@ import com.mycompany.oficina.financeiro.CancelamentoAgendamento;
 import com.mycompany.oficina.financeiro.GerenciadorFinanceiro;
 import com.mycompany.oficina.interpreter.*;
 import com.mycompany.oficina.ordemservico.GerenciadorOrdemDeServico;
-import com.mycompany.oficina.segurança.Sessao;
+import com.mycompany.oficina.seguranca.Sessao;
 import com.mycompany.oficina.utilidades.FormatadorCpf;
 import com.mycompany.oficina.strategy.*;
 
@@ -22,7 +22,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 public class MenuAtendente implements Menu {
     private final GerenciadorCliente gerenciadorCliente;

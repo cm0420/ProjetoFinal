@@ -1,17 +1,16 @@
 package com.mycompany.oficina.Menus;
 
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 public class Navegador {
     private static Navegador instance;
-    private final Stack<Menu> pilhaDeMenus;
+    private final Deque<Menu> pilhaDeMenus = new ArrayDeque<>();
 
-    public Navegador(Stack<Menu> pilhaDeMenus) {
-        this.pilhaDeMenus = new Stack<>();
-    }
+
     public static Navegador getInstance() {
         if (instance == null) {
-            instance = new Navegador(new Stack<>());
+            instance = new Navegador();
         }
         return instance;
     }

@@ -11,10 +11,10 @@ import java.util.List;
  * @author Mariaa
  */
 public class Estoque {
-    private List<Produto> produtos;
+    private List<Produto> produtos = new ArrayList<>();;
 
     public Estoque(ArrayList<Produto> produtos) {
-        this.produtos = new ArrayList<>();
+        this.produtos = produtos;
     }
 
     public Estoque() {

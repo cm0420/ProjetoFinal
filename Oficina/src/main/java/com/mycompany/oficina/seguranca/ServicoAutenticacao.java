@@ -1,4 +1,4 @@
-package com.mycompany.oficina.segurança;
+package com.mycompany.oficina.seguranca;
 
 import com.mycompany.oficina.controlador.GerenciadorFuncionario;
 import com.mycompany.oficina.entidades.Funcionario;
