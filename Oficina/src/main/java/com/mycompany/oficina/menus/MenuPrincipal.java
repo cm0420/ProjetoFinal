@@ -4,6 +4,7 @@ import com.mycompany.oficina.agendamento.AgendaOficina;
 import com.mycompany.oficina.controlador.GerenciadorCarros;
 import com.mycompany.oficina.controlador.GerenciadorCliente;
 import com.mycompany.oficina.controlador.GerenciadorFuncionario;
+import com.mycompany.oficina.financeiro.GerenciadorFinanceiro;
 import com.mycompany.oficina.loja.Estoque;
 import com.mycompany.oficina.ordemservico.GerenciadorOrdemDeServico;
 import com.mycompany.oficina.seguranca.Sessao;
@@ -20,12 +21,14 @@ public class MenuPrincipal implements Menu {
     private  final GerenciadorCarros gerenciadorCarros;
     private final GerenciadorFuncionario gerenciadorFuncionario;
     private final GerenciadorPonto gerenciadorPonto;
+    private  GerenciadorFinanceiro gerenciadorFinanceiro;
+
 
 
     // 2. Construtor que recebe as dependências
     public MenuPrincipal(AgendaOficina agenda, Estoque estoque, GerenciadorOrdemDeServico gerenciadorOS,
                          GerenciadorCliente gerenciadorCliente, GerenciadorCarros gerenciadorCarros,
-                         GerenciadorFuncionario gerenciadorFuncionario, GerenciadorPonto gerenciadorPonto) {
+                         GerenciadorFuncionario gerenciadorFuncionario, GerenciadorPonto gerenciadorPonto, GerenciadorFinanceiro gerenciadorFinanceiro) {
         this.agenda = agenda;
         this.estoque = estoque;
         this.gerenciadorOS = gerenciadorOS;
@@ -33,6 +36,7 @@ public class MenuPrincipal implements Menu {
         this.gerenciadorCarros = gerenciadorCarros;
         this.gerenciadorFuncionario = gerenciadorFuncionario;
         this.gerenciadorPonto = gerenciadorPonto;
+
     }
 
 
@@ -68,13 +72,14 @@ public class MenuPrincipal implements Menu {
         String cargo = Sessao.getInstance().getCargoUsuarioLogado();
         switch (cargo) {
             case "Atendente":
-               Navegador.getInstance().navegarPara(new MenuAtendente(gerenciadorCliente, gerenciadorCarros, gerenciadorFuncionario, agenda, gerenciadorOS, gerenciadorPonto));
+               Navegador.getInstance().navegarPara(new MenuAtendente(gerenciadorCliente, gerenciadorCarros,
+                       gerenciadorFuncionario, agenda, gerenciadorOS, gerenciadorPonto, this.gerenciadorFinanceiro));
                 break;
             case "Mecanico":
                 Navegador.getInstance().navegarPara(new MenuMecanico(agenda, estoque, gerenciadorOS, gerenciadorPonto));
                 break;
             case "Gerente":
-               /* Navegador.getInstance().navegarPara(new MenuGerente());*/
+                Navegador.getInstance().navegarPara(new MenuGerente(gerenciadorCliente, gerenciadorCarros, gerenciadorFuncionario, agenda, gerenciadorOS, gerenciadorPonto, this.gerenciadorFinanceiro, estoque));
                 break;
             // Adicionar outros cargos aqui...
             default:

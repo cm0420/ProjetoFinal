@@ -1,47 +1,165 @@
 package com.mycompany.oficina.financeiro;
 
+import com.google.gson.reflect.TypeToken;
+import com.mycompany.oficina.entidades.Funcionario;
+import com.mycompany.oficina.ordemservico.OrdemDeServico;
+import com.mycompany.oficina.persistencia.PersistenciaJson;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GerenciadorFinanceiro {
-    private static GerenciadorFinanceiro instance;
-    private final List<CancelamentoAgendamento> cobrancasPendentes;
 
-    // Construtor privado impede a criação de instâncias fora da classe
-    private GerenciadorFinanceiro() {
-        this.cobrancasPendentes = new ArrayList<>();
+    private static GerenciadorFinanceiro instance;
+    private final List<RegistroFinanceiro> registros;
+    private final PersistenciaJson persistencia;
+    private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+    // Construtor privado que recebe a persistência e carrega os dados
+    private GerenciadorFinanceiro(PersistenciaJson persistencia) {
+        this.persistencia = persistencia;
+        this.registros = this.persistencia.carregarLista("financeiro", new TypeToken<ArrayList<RegistroFinanceiro>>() {});
     }
 
-    /**
-     * Retorna a instância única (Singleton) do gerenciador financeiro.
-     * @return A instância de GerenciadorFinanceiro.
-     */
-    public static GerenciadorFinanceiro getInstance() {
+    // Método estático para obter a instância, garantindo a injeção da persistência
+    public static GerenciadorFinanceiro getInstance(PersistenciaJson persistencia) {
         if (instance == null) {
-            instance = new GerenciadorFinanceiro();
+            instance = new GerenciadorFinanceiro(persistencia);
         }
         return instance;
     }
 
+    // Método privado para salvar o estado atual no arquivo JSON
+    private void salvar() {
+        persistencia.salvarLista("financeiro", this.registros);
+    }
+
+    // --- MÉTODOS DE REGISTRO DE TRANSAÇÕES ---
+
     /**
-     * Registra uma nova cobrança de cancelamento.
-     * @param cobranca A cobrança a ser arquivada.
+     * Registra a receita de uma taxa de cancelamento de agendamento.
      */
-    public void registrarCobrancaCancelamento(CancelamentoAgendamento cobranca) {
-        if (cobranca != null) {
-            this.cobrancasPendentes.add(cobranca);
-            System.out.println("[LOG Financeiro]: Nova cobrança de cancelamento registrada. " + cobranca);
-        }
+    public void registrarReceitaCancelamento(String clienteNome, double valor, String motivo) {
+        String descricao = "Taxa de cancelamento para cliente " + clienteNome + ". Motivo: " + motivo;
+        registros.add(new RegistroFinanceiro(descricao, valor, TipoRegistro.RECEITA_CANCELAMENTO, LocalDateTime.now()));
+        salvar();
     }
 
     /**
-     * Retorna uma lista de todas as cobranças pendentes.
-     * A lista não pode ser modificada externamente.
-     * @return Uma lista de CobrançaCancelamento.
+     * Registra a receita de uma OS finalizada e a despesa da comissão do mecânico.
      */
-    public List<CancelamentoAgendamento> getCobrancasPendentes() {
-        return Collections.unmodifiableList(cobrancasPendentes);
+    public void registrarFaturamentoOS(OrdemDeServico os) {
+        // Registra a receita total do serviço
+        String descReceita = "Receita da OS #" + os.getNumeroOS() + " para cliente " + os.getCliente().getNome();
+        registros.add(new RegistroFinanceiro(descReceita, os.calcularValorTotal(), TipoRegistro.RECEITA_SERVICO, os.getDataAbertura()));
+
+        // Registra a despesa com a comissão de 5%
+        double comissao = os.calcularValorTotal() * 0.05;
+        String descComissao = "Comissão (5%) da OS #" + os.getNumeroOS() + " para mecânico " + os.getMecanicoResponsavel().getNome();
+        registros.add(new RegistroFinanceiro(descComissao, comissao, TipoRegistro.DESPESA_COMISSAO, os.getDataAbertura()));
+
+        salvar(); // Salva as duas transações
+    }
+
+    /**
+     * Registra a despesa com a compra de peças para repor o estoque.
+     */
+    public void registrarDespesaCompraPecas(String notaFiscal, double valorTotal) {
+        registros.add(new RegistroFinanceiro(notaFiscal, valorTotal, TipoRegistro.DESPESA_PECAS, LocalDateTime.now()));
+        salvar();
+    }
+
+    /**
+     * Simula o pagamento de salários fixos para atendentes e mecânicos.
+     */
+    public void pagarSalarios(List<Funcionario> todosFuncionarios) {
+        for (Funcionario f : todosFuncionarios) {
+            double salario = 0;
+            if ("Atendente".equals(f.getCargo())) salario = 1000;
+            if ("Mecanico".equals(f.getCargo())) salario = 1500;
+
+            if (salario > 0) {
+                registros.add(new RegistroFinanceiro("Salário de " + f.getNome(), salario, TipoRegistro.DESPESA_SALARIO, LocalDateTime.now()));
+            }
+        }
+        System.out.println("Folha de pagamento registrada.");
+        salvar();
+    }
+
+    // --- MÉTODOS DE RELATÓRIOS E BALANÇOS ---
+
+    public void emitirRelatorioServicos(LocalDate inicio, LocalDate fim) {
+        System.out.println("\n--- Relatório de Serviços de " + inicio.format(dtf) + " a " + fim.format(dtf) + " ---");
+        List<RegistroFinanceiro> servicos = registros.stream()
+                .filter(r -> r.getTipo() == TipoRegistro.RECEITA_SERVICO)
+                .filter(r -> !r.getData().toLocalDate().isBefore(inicio) && !r.getData().toLocalDate().isAfter(fim))
+                .toList();
+
+        if (servicos.isEmpty()) {
+            System.out.println("Nenhum serviço encontrado no período.");
+            return;
+        }
+        servicos.forEach(s -> System.out.printf("Data: %s | Descrição: %s | Valor: R$ %.2f\n", s.getData().format(dtf), s.getDescricao(), s.getValor()));
+    }
+
+    public void emitirBalanco(LocalDate inicio, LocalDate fim) {
+        List<RegistroFinanceiro> registrosPeriodo = registros.stream()
+                .filter(r -> !r.getData().toLocalDate().isBefore(inicio) && !r.getData().toLocalDate().isAfter(fim))
+                .toList();
+
+        double receitas = registrosPeriodo.stream()
+                .filter(r -> r.getTipo() == TipoRegistro.RECEITA_SERVICO || r.getTipo() == TipoRegistro.RECEITA_CANCELAMENTO)
+                .mapToDouble(RegistroFinanceiro::getValor)
+                .sum();
+
+        double despesas = registrosPeriodo.stream()
+                .filter(r -> r.getTipo() == TipoRegistro.DESPESA_SALARIO || r.getTipo() == TipoRegistro.DESPESA_COMISSAO || r.getTipo() == TipoRegistro.DESPESA_PECAS)
+                .mapToDouble(RegistroFinanceiro::getValor)
+                .sum();
+
+        System.out.println("\n--- Balanço Financeiro de " + inicio.format(dtf) + " a " + fim.format(dtf) + " ---");
+        System.out.printf("Total de Receitas: R$ %.2f\n", receitas);
+        System.out.printf("Total de Despesas: R$ %.2f\n", despesas);
+        System.out.println("----------------------------------------");
+        System.out.printf("Lucro (Salário do Gerente): R$ %.2f\n", (receitas - despesas));
+        System.out.println("----------------------------------------");
+    }
+    public void emitirRelatorioDespesasDetalhado(LocalDate inicio, LocalDate fim) {
+        System.out.println("\n--- Relatório Detalhado de Despesas de " + inicio.format(dtf) + " a " + fim.format(dtf) + " ---");
+
+        List<RegistroFinanceiro> despesasPeriodo = registros.stream()
+                .filter(r -> r.getTipo() != TipoRegistro.RECEITA_SERVICO && r.getTipo() != TipoRegistro.RECEITA_CANCELAMENTO) // Pega apenas despesas
+                .filter(r -> !r.getData().toLocalDate().isBefore(inicio) && !r.getData().toLocalDate().isAfter(fim))
+                .toList();
+
+        if (despesasPeriodo.isEmpty()) {
+            System.out.println("Nenhuma despesa encontrada no período.");
+            return;
+        }
+
+        // Itera e imprime cada despesa, incluindo salários individuais
+        for (RegistroFinanceiro despesa : despesasPeriodo) {
+            System.out.printf("Data: %s | Tipo: %-18s | Valor: R$ %-10.2f | Descrição: %s\n",
+                    despesa.getData().format(dtf),
+                    despesa.getTipo().name(), // Mostra o tipo (DESPESA_SALARIO, etc)
+                    despesa.getValor(),
+                    despesa.getDescricao() // A descrição já diz "Salário de João", "Comissão de Maria", etc.
+            );
+        }
+
+        // Calcula e imprime o total de despesas no final do relatório
+        double totalDespesas = despesasPeriodo.stream()
+                .mapToDouble(RegistroFinanceiro::getValor)
+                .sum();
+
+        System.out.println("----------------------------------------------------------------------------------");
+        System.out.printf("Total de Despesas no Período: R$ %.2f\n", totalDespesas);
+        System.out.println("----------------------------------------------------------------------------------");
     }
 }
 

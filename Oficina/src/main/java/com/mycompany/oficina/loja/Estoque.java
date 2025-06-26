@@ -4,57 +4,72 @@
  */
 package com.mycompany.oficina.loja;
 
+import com.google.gson.reflect.TypeToken;
+import com.mycompany.oficina.persistencia.PersistenciaJson; // <-- IMPORTAR
+
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author Mariaa
- */
 public class Estoque {
-    private List<Produto> produtos = new ArrayList<>();;
+    private List<Produto> produtos;
+    private PersistenciaJson persistencia;
 
-    public Estoque(ArrayList<Produto> produtos) {
-        this.produtos = produtos;
+    // Construtor que recebe a persistência e carrega os dados
+    public Estoque(PersistenciaJson persistencia) {
+        this.persistencia = persistencia;
+        this.produtos = this.persistencia.carregarLista("estoque", new TypeToken<ArrayList<Produto>>() {});
     }
 
-    public Estoque() {
+    // Método para salvar o estado atual do estoque no arquivo JSON
+    public void salvarEstoque() {
+        this.persistencia.salvarLista("estoque", this.produtos);
     }
 
-    /**
-     * @return
-     */
+    // O construtor vazio não é mais necessário se a persistência for obrigatória
+    // public Estoque() { this.produtos = new ArrayList<>(); }
+
     public List<Produto> getProdutos() {
         return produtos;
     }
 
     public void adicionarProduto(Produto produto) {
         produtos.add(produto);
+        salvarEstoque(); // Salva imediatamente
     }
 
-    public void removerProduto(Produto produto) {
-        produtos.remove(produto);
-    }
-
-    /**
-     * Cadastra um novo produto no estoque, se o ID ainda não existir.
-     *
-     * @param produto Produto a ser cadastrado
-     * @return true se o produto foi cadastrado com sucesso, false se já existir
-     */
     public boolean cadastrarProduto(Produto produto) {
         if (buscarProduto(produto.getIdProduto()) != null) {
-            return false; // Produto já existe
+            return false;
         }
-        adicionarProduto(produto);
+        adicionarProduto(produto); // O adicionarProduto já salva
         return true;
     }
 
-    /**
-     * Busca um produto no estoque pelo ID.
-     *
-     * @param idProduto ID do produto a buscar
-     * @return Produto encontrado, ou null se não existir
-     */
+    public boolean editarProduto(String idProduto, String novoNome, double novoPreco, int novaQuantidade, String novoFornecedor) {
+        Produto produto = buscarProduto(idProduto);
+        if (produto != null) {
+            produto.setNome(novoNome);
+            produto.setPreco(novoPreco);
+            produto.setQuantidade(novaQuantidade);
+            produto.setFornecedor(novoFornecedor);
+            salvarEstoque(); // Salva imediatamente
+            return true;
+        }
+        return false;
+    }
+
+    public boolean removerProduto(String idProduto) {
+        Produto produto = buscarProduto(idProduto);
+        if (produto != null) {
+            produtos.remove(produto);
+            salvarEstoque(); // Salva imediatamente
+            return true;
+        }
+        return false;
+    }
+
+    // --- MÉTODOS DE BUSCA E LISTAGEM (SEM ALTERAÇÃO) ---
+
     public Produto buscarProduto(String idProduto) {
         for (Produto p : produtos) {
             if (p.getIdProduto().equals(idProduto)) {
@@ -64,67 +79,8 @@ public class Estoque {
         return null;
     }
 
-    /**
-     * Lista todos os produtos atualmente no estoque.
-     *
-     * @return Lista de todos os produtos
-     */
-    public ArrayList<Produto> listarProdutos() {
-        return new ArrayList<>(produtos); // Cópia para segurança
+    public List<Produto> listarProdutos() {
+        // Retorna uma cópia para evitar modificação externa direta da lista principal
+        return new ArrayList<>(produtos);
     }
-
-    /**
-     * Lista os produtos cujo nome contenha a peça informada (ignora maiúsculas/minúsculas).
-     *
-     * @param peca Parte do nome a buscar
-     * @return Lista de produtos encontrados
-     */
-    public ArrayList<Produto> listarProdutosPorPeca(String peca) {
-        ArrayList<Produto> resultados = new ArrayList<>();
-        String pecaLower = peca.toLowerCase();
-        for (Produto p : produtos) {
-            if (p.getNome().toLowerCase().contains(pecaLower)) {
-                resultados.add(p);
-            }
-        }
-        return resultados;
-    }
-
-    /**
-     * Edita os dados de um produto identificado pelo ID.
-     *
-     * @param idProduto      ID do produto a editar
-     * @param novoNome       Novo nome do produto
-     * @param novoPreco      Novo preço
-     * @param novaQuantidade Nova quantidade
-     * @param novoFornecedor Novo fornecedor
-     * @return true se o produto foi encontrado e atualizado, false se não encontrado
-     */
-    public boolean editarProduto(String idProduto, String novoNome, double novoPreco, int novaQuantidade, String novoFornecedor) {
-        Produto produto = buscarProduto(idProduto);
-        if (produto != null) {
-            produto.setNome(novoNome);
-            produto.setPreco(novoPreco);
-            produto.setQuantidade(novaQuantidade);
-            produto.setFornecedor(novoFornecedor);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Remove um produto do estoque com base no ID.
-     *
-     * @param idProduto ID do produto a remover
-     * @return true se o produto foi removido, false se não encontrado
-     */
-    public boolean removerProduto(String idProduto) {
-        Produto produto = buscarProduto(idProduto);
-        if (produto != null) {
-            removerProduto(produto);
-            return true;
-        }
-        return false;
-    }
-
 }

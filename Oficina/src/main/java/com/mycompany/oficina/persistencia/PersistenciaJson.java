@@ -40,6 +40,9 @@ public class PersistenciaJson {
         registrarEntidade("pontos", "registros_ponto.json");
         registrarEntidade("ordens_servico", "ordens_servico.json");
         registrarEntidade("agenda", "agenda.json");
+        registrarEntidade("estoque", "estoque.json");
+        registrarEntidade("financeiro", "financeiro.json");
+
     }
 
     private void registrarEntidade(String chave, String nomeArquivo) {

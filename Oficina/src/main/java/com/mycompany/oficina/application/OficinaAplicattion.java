@@ -1,4 +1,5 @@
 package com.mycompany.oficina.application;
+import com.mycompany.oficina.financeiro.GerenciadorFinanceiro;
 import com.mycompany.oficina.menus.MenuPrincipal;
 import com.mycompany.oficina.menus.Navegador;
 import com.mycompany.oficina.agendamento.AgendaOficina;
@@ -32,7 +33,9 @@ public class OficinaAplicattion {
     private final GerenciadorPonto gerenciadorPonto;
     private final AgendaOficina agenda;
     private final Estoque estoque;
+    private final GerenciadorFinanceiro gerenciadorFinanceiro;
     private final ServicoAutenticacao servicoAutenticacao;
+
     private final PersistenciaJson persistencia;
 
     /**
@@ -49,10 +52,11 @@ public class OficinaAplicattion {
         this.gerenciadorCarros = new GerenciadorCarros(persistencia);
         this.gerenciadorOS = new GerenciadorOrdemDeServico(persistencia);
         this.gerenciadorPonto = new GerenciadorPonto(persistencia);
+        this.gerenciadorFinanceiro = GerenciadorFinanceiro.getInstance(persistencia);
 
         // Instancia os outros componentes que não dependem diretamente da persistência
         this.agenda = new AgendaOficina(); // (Se precisar de persistência, seguirá o mesmo padrão)
-        this.estoque = new Estoque();     // (Idem)
+        this.estoque = new Estoque(persistencia);     // (Idem)
         this.servicoAutenticacao = new ServicoAutenticacao(gerenciadorFuncionario);
     }
 
@@ -73,7 +77,7 @@ public class OficinaAplicattion {
     public void run() {
         // O carregamento agora é feito automaticamente pelos construtores dos gerenciadores.
         // Não precisamos mais de um método carregarTodosOsDados() aqui.
-       //verificarECriarAdminPadrao();
+        verificarECriarAdminPadrao();
         Scanner scanner = new Scanner(System.in);
         System.out.println("====== BEM-VINDO AO SISTEMA DA OFICINA ======");
 
@@ -92,7 +96,7 @@ public class OficinaAplicattion {
                     System.out.println("==============================================");
                     // Passa todos os gerenciadores para o MenuPrincipal
                     Navegador.getInstance().navegarPara(new MenuPrincipal(agenda, estoque, gerenciadorOS, gerenciadorCliente,
-                            gerenciadorCarros, gerenciadorFuncionario, gerenciadorPonto));
+                            gerenciadorCarros, gerenciadorFuncionario, gerenciadorPonto, gerenciadorFinanceiro));
                 } else {
                     System.out.println(">>> ERRO: CPF ou senha inválidos. Tente novamente.");
                 }
@@ -112,7 +116,7 @@ public class OficinaAplicattion {
         }
         scanner.close();
     }
-   /* private void verificarECriarAdminPadrao() {
+   private void verificarECriarAdminPadrao() {
         // Verifica se a lista de funcionários está vazia
         if (gerenciadorFuncionario.listarTodos().isEmpty()) {
             System.out.println("[Sistema] Nenhum funcionário encontrado. Criando usuário 'Admin' padrão...");
@@ -130,7 +134,7 @@ public class OficinaAplicattion {
 
             System.out.println("[Sistema] Usuário 'Admin' criado. Use CPF '00000000000' e senha 'admin' para o primeiro login.");
         }
-    }*/
+    }
 
     /**
      * Salva um backup final de todos os dados ao encerrar a aplicação.

@@ -105,6 +105,14 @@ public class OrdemDeServico implements Assunto, Entidades {
         this.notificarObservadores();
     }
 
+    public LocalDateTime getDataAbertura() {
+        return dataAbertura;
+    }
+
+    public Funcionario getMecanicoResponsavel() {
+        return mecanicoResponsavel;
+    }
+
     // --- Implementação do Padrão Observer ---
     @Override
     public void adicionarObservador(Observador observador) { this.observadores.add(observador); }

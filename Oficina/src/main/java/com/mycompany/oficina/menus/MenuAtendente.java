@@ -13,6 +13,7 @@ import com.mycompany.oficina.financeiro.CancelamentoAgendamento;
 import com.mycompany.oficina.financeiro.GerenciadorFinanceiro;
 import com.mycompany.oficina.interpreter.*;
 import com.mycompany.oficina.ordemservico.GerenciadorOrdemDeServico;
+import com.mycompany.oficina.persistencia.PersistenciaJson;
 import com.mycompany.oficina.seguranca.Sessao;
 import com.mycompany.oficina.sistemaponto.GerenciadorPonto; // <-- IMPORTAR
 import com.mycompany.oficina.sistemaponto.RegistroPonto; // <-- IMPORTAR
@@ -32,20 +33,23 @@ public class MenuAtendente implements Menu {
     private final GerenciadorCarros gerenciadorCarros;
     private final GerenciadorFuncionario gerenciadorFuncionario;
     private final GerenciadorOrdemDeServico gerenciadorOS;
-    private final GerenciadorPonto gerenciadorPonto; // <-- ADICIONAR
+    private final GerenciadorPonto gerenciadorPonto;
+    private final GerenciadorFinanceiro gerenciadorFinanceiro;// <-- ADICIONAR
     private final AgendaOficina agenda;
     private final Scanner scanner;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private PersistenciaJson persistencia;
 
     // ATUALIZAR O CONSTRUTOR
-    public MenuAtendente(GerenciadorCliente gCliente, GerenciadorCarros gCarros, GerenciadorFuncionario gFunc, AgendaOficina ag, GerenciadorOrdemDeServico gOS, GerenciadorPonto gPonto) {
+    public MenuAtendente(GerenciadorCliente gCliente, GerenciadorCarros gCarros, GerenciadorFuncionario gFunc, AgendaOficina ag, GerenciadorOrdemDeServico gOS, GerenciadorPonto gPonto, GerenciadorFinanceiro gF) {
         this.gerenciadorCliente = gCliente;
         this.gerenciadorCarros = gCarros;
         this.gerenciadorFuncionario = gFunc;
         this.gerenciadorOS = gOS;
         this.agenda = ag;
         this.gerenciadorPonto = gPonto; // <-- ATRIBUIR
+        this.gerenciadorFinanceiro = gF;
         this.scanner = new Scanner(System.in);
     }
 
@@ -78,7 +82,7 @@ public class MenuAtendente implements Menu {
         Navegador.getInstance().voltarPara();
     }
 
-    // --- NOVO MÉTODO: MENU DE PONTO (idêntico ao do mecânico) ---
+    // --- NOVO METODO: MENU DE PONTO (idêntico ao do mecânico) ---
     private void menuPonto() {
         Funcionario funcionarioLogado = Sessao.getInstance().getUsuarioLogado();
 
@@ -103,7 +107,7 @@ public class MenuAtendente implements Menu {
                     List<RegistroPonto> meusRegistros = gerenciadorPonto.getRegistrosPorFuncionario(funcionarioLogado);
                     List<RegistroPonto> registrosDeHoje = meusRegistros.stream()
                             .filter(r -> r.getDataHoraEntrada().toLocalDate().isEqual(LocalDate.now()))
-                            .collect(Collectors.toList());
+                            .toList();
 
                     if(registrosDeHoje.isEmpty()){
                         System.out.println("Nenhum registro encontrado para hoje.");
@@ -132,6 +136,10 @@ public class MenuAtendente implements Menu {
             }
         }
     }
+    public String getValidadorDeDados(String prompt, Validate estrategia) {
+        // Ele simplesmente chama o método privado e retorna o seu resultado.
+        return obterDadoValido(prompt, estrategia);
+    }
 
     // --- SUBMENUS PRINCIPAIS ---
 
@@ -153,7 +161,9 @@ public class MenuAtendente implements Menu {
             default: System.out.println("Opção inválida.");
         }
     }
-
+    public void getMenuClientes() {
+        menuClientes();
+    }
     private void menuVeiculos() {
         System.out.println("\n--- Gerenciar Veículos ---");
         System.out.println("1. Cadastrar Novo Veículo");
@@ -172,6 +182,9 @@ public class MenuAtendente implements Menu {
             default: System.out.println("Opção inválida.");
         }
     }
+    public void getMenuVeiculos() {
+        menuVeiculos();
+    }
 
     private void menuAgendamentos() {
         System.out.println("\n--- Gerenciar Agendamentos ---");
@@ -187,7 +200,9 @@ public class MenuAtendente implements Menu {
             default: System.out.println("Opção inválida.");
         }
     }
-
+    public void getMenuAgendamentos() {
+        menuAgendamentos();
+    }
     // --- LÓGICA DE CLIENTES ---
 
     private Cliente cadastrarCliente() {
@@ -378,7 +393,7 @@ public class MenuAtendente implements Menu {
 
         boolean temAgendamento = agenda.getDatasAgendadas().stream()
                 .flatMap(data -> List.of(agenda.getHorariosDoDia(data)).stream())
-                .anyMatch(ag -> ag != null && ag.getCarro().equals(carro));
+                .anyMatch(ag -> ag.getCarro().equals(carro));
         boolean temOS = gerenciadorOS.listarTodos().stream()
                 .anyMatch(os -> os.getCarro().equals(carro) && !os.getStatusAtual().equals("Finalizada"));
 
@@ -513,7 +528,7 @@ public class MenuAtendente implements Menu {
             double taxa = 150.0 * 0.20; // 20% da mão de obra fixa
             System.out.printf("AVISO: Cancelamento no dia do serviço gerou uma taxa de R$ %.2f.\n", taxa);
             String motivo = "Cancelamento no dia do serviço (" + dateFormatter.format(LocalDate.now()) + ")";
-            GerenciadorFinanceiro.getInstance().registrarCobrancaCancelamento(new CancelamentoAgendamento(agendamento.getCliente(), taxa, motivo));
+            this.gerenciadorFinanceiro.registrarReceitaCancelamento(agendamento.getCliente().getNome(), taxa, motivo);
         }
 
         if(agenda.cancelarAgendamento(agendamento)) {

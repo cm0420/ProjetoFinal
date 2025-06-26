@@ -109,7 +109,7 @@ public class MenuMecanico implements Menu {
                     List<RegistroPonto> meusRegistros = gerenciadorPonto.getRegistrosPorFuncionario(funcionarioLogado);
                     List<RegistroPonto> registrosDeHoje = meusRegistros.stream()
                             .filter(r -> r.getDataHoraEntrada().toLocalDate().isEqual(LocalDate.now()))
-                            .collect(Collectors.toList());
+                            .toList();
 
                     if(registrosDeHoje.isEmpty()){
                         System.out.println("Nenhum registro encontrado para hoje.");
