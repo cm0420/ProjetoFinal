@@ -1,4 +1,5 @@
-package com.mycompany.oficina.Menus;
+package com.mycompany.oficina.menus;
+
 import com.mycompany.oficina.agendamento.AgendaOficina;
 import com.mycompany.oficina.agendamento.Agendamento;
 import com.mycompany.oficina.agendamento.TipoServico;
@@ -13,6 +14,8 @@ import com.mycompany.oficina.financeiro.GerenciadorFinanceiro;
 import com.mycompany.oficina.interpreter.*;
 import com.mycompany.oficina.ordemservico.GerenciadorOrdemDeServico;
 import com.mycompany.oficina.seguranca.Sessao;
+import com.mycompany.oficina.sistemaponto.GerenciadorPonto; // <-- IMPORTAR
+import com.mycompany.oficina.sistemaponto.RegistroPonto; // <-- IMPORTAR
 import com.mycompany.oficina.utilidades.FormatadorCpf;
 import com.mycompany.oficina.strategy.*;
 
@@ -22,23 +25,27 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class MenuAtendente implements Menu {
     private final GerenciadorCliente gerenciadorCliente;
     private final GerenciadorCarros gerenciadorCarros;
     private final GerenciadorFuncionario gerenciadorFuncionario;
     private final GerenciadorOrdemDeServico gerenciadorOS;
+    private final GerenciadorPonto gerenciadorPonto; // <-- ADICIONAR
     private final AgendaOficina agenda;
     private final Scanner scanner;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    public MenuAtendente(GerenciadorCliente gCliente, GerenciadorCarros gCarros, GerenciadorFuncionario gFunc, AgendaOficina ag, GerenciadorOrdemDeServico gOS) {
+    // ATUALIZAR O CONSTRUTOR
+    public MenuAtendente(GerenciadorCliente gCliente, GerenciadorCarros gCarros, GerenciadorFuncionario gFunc, AgendaOficina ag, GerenciadorOrdemDeServico gOS, GerenciadorPonto gPonto) {
         this.gerenciadorCliente = gCliente;
         this.gerenciadorCarros = gCarros;
         this.gerenciadorFuncionario = gFunc;
         this.gerenciadorOS = gOS;
         this.agenda = ag;
+        this.gerenciadorPonto = gPonto; // <-- ATRIBUIR
         this.scanner = new Scanner(System.in);
     }
 
@@ -55,6 +62,7 @@ public class MenuAtendente implements Menu {
             System.out.println("1. Gerenciar Clientes");
             System.out.println("2. Gerenciar Veículos");
             System.out.println("3. Gerenciar Agendamentos");
+            System.out.println("4. Registrar Ponto"); // <-- NOVA OPÇÃO
             System.out.println("0. Voltar ao Menu Principal (Logout)");
             System.out.print("Escolha uma opção: ");
 
@@ -62,12 +70,56 @@ public class MenuAtendente implements Menu {
                 case "1": menuClientes(); break;
                 case "2": menuVeiculos(); break;
                 case "3": menuAgendamentos(); break;
+                case "4": menuPonto(); break; // <-- CHAMAR NOVO MÉTODO
                 case "0": executando = false; break;
                 default: System.out.println("Opção inválida.");
             }
         }
         Navegador.getInstance().voltarPara();
     }
+
+    // --- NOVO MÉTODO: MENU DE PONTO (idêntico ao do mecânico) ---
+    private void menuPonto() {
+        Funcionario funcionarioLogado = Sessao.getInstance().getUsuarioLogado();
+
+        boolean noMenuPonto = true;
+        while(noMenuPonto) {
+            System.out.println("\n--- Sistema de Registro de Ponto ---");
+            System.out.println("1. Bater Ponto de ENTRADA");
+            System.out.println("2. Bater Ponto de SAÍDA");
+            System.out.println("3. Ver Meus Registros de Hoje");
+            System.out.println("0. Voltar ao Menu do Atendente");
+            System.out.print("Escolha uma opção: ");
+
+            switch(scanner.nextLine()) {
+                case "1":
+                    gerenciadorPonto.baterPontoEntrada(funcionarioLogado);
+                    break;
+                case "2":
+                    gerenciadorPonto.baterPontoSaida(funcionarioLogado);
+                    break;
+                case "3":
+                    System.out.println("\n--- Meus Registros de Ponto de Hoje ---");
+                    List<RegistroPonto> meusRegistros = gerenciadorPonto.getRegistrosPorFuncionario(funcionarioLogado);
+                    List<RegistroPonto> registrosDeHoje = meusRegistros.stream()
+                            .filter(r -> r.getDataHoraEntrada().toLocalDate().isEqual(LocalDate.now()))
+                            .collect(Collectors.toList());
+
+                    if(registrosDeHoje.isEmpty()){
+                        System.out.println("Nenhum registro encontrado para hoje.");
+                    } else {
+                        registrosDeHoje.forEach(System.out::println);
+                    }
+                    break;
+                case "0":
+                    noMenuPonto = false;
+                    break;
+                default:
+                    System.out.println("Opção inválida.");
+            }
+        }
+    }
+
     // --- METODO HELPER QUE IMPLEMENTA O PADRÃO STRATEGY ---
     private String obterDadoValido(String prompt, Validate estrategia) {
         while (true) {
@@ -327,7 +379,7 @@ public class MenuAtendente implements Menu {
         boolean temAgendamento = agenda.getDatasAgendadas().stream()
                 .flatMap(data -> List.of(agenda.getHorariosDoDia(data)).stream())
                 .anyMatch(ag -> ag != null && ag.getCarro().equals(carro));
-        boolean temOS = gerenciadorOS.listarTodas().stream()
+        boolean temOS = gerenciadorOS.listarTodos().stream()
                 .anyMatch(os -> os.getCarro().equals(carro) && !os.getStatusAtual().equals("Finalizada"));
 
         if (temAgendamento || temOS) {

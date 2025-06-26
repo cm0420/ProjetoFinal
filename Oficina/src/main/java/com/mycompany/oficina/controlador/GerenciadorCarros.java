@@ -1,7 +1,11 @@
 package com.mycompany.oficina.controlador;
 
+import com.google.gson.reflect.TypeToken;
 import com.mycompany.oficina.entidades.Carro;
 import com.mycompany.oficina.entidades.Cliente;
+import com.mycompany.oficina.persistencia.PersistenciaJson;
+
+import java.util.ArrayList;
 
 /**
  * Classe responsável pelo gerenciamento dos carros da oficina.
@@ -11,7 +15,9 @@ import com.mycompany.oficina.entidades.Cliente;
  * @author Miguel
  */
 public class GerenciadorCarros extends GerenciadorGenerico<Carro> {
-
+public GerenciadorCarros(PersistenciaJson persistencia) {
+    super(persistencia, "carros", new TypeToken<ArrayList<Carro>>() {});
+}
   /**
      * Cria e cadastra um novo carro, associando-o a um cliente.
      * Este método é específico pois sabe como construir um objeto Carro.
@@ -49,6 +55,7 @@ public class GerenciadorCarros extends GerenciadorGenerico<Carro> {
             carroParaEditar.setFabricante(novoFabricante);
             carroParaEditar.setModelo(novoModelo);
             carroParaEditar.setPlaca(novaPlaca);
+            super.salvarAlteracoes();
             return true;
         }
         return false;

@@ -1,0 +1,20 @@
+[{
+  "senha" : "mec123",
+  "cargo" : "Mecanico",
+  "nome" : "Jorge",
+  "cpf": "12345678910",
+  "telefone": "00000000000",
+  "endereco": "N/A",
+  "email": "admin@oficina.com"
+},
+
+  {
+    "senha" : "aten123",
+    "cargo" : "Atendente",
+    "nome" : "Jéssica",
+    "cpf": "12345678911",
+    "telefone": "00000000000",
+    "endereco": "N/A",
+    "email": "admin@oficina.com"
+  }
+]

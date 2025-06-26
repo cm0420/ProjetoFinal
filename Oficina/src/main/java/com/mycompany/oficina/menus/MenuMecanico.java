@@ -1,4 +1,4 @@
-package com.mycompany.oficina.Menus;
+package com.mycompany.oficina.menus;
 
 import com.mycompany.oficina.agendamento.AgendaOficina;
 import com.mycompany.oficina.agendamento.Agendamento;
@@ -182,7 +182,7 @@ public class MenuMecanico implements Menu {
 
     private void gerenciarOSExistente() {
         System.out.println("\n--- Gerenciar OS Existente ---");
-        List<OrdemDeServico> listaOS = gerenciadorOS.listarTodas();
+        List<OrdemDeServico> listaOS = gerenciadorOS.listarTodos();
 
         if (listaOS.isEmpty()) {
             System.out.println("Nenhuma Ordem de Serviço aberta.");
@@ -208,7 +208,7 @@ public class MenuMecanico implements Menu {
 
         System.out.print("Digite o ID da OS para gerenciar: ");
         String idOS = scanner.nextLine();
-        OrdemDeServico osSelecionada = gerenciadorOS.buscarPorId(idOS);
+        OrdemDeServico osSelecionada = gerenciadorOS.buscarPorIdentificador(idOS);
 
         if (osSelecionada != null) {
             exibirSubMenuDaOS(osSelecionada);

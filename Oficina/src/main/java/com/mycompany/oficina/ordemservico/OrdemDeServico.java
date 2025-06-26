@@ -2,6 +2,7 @@ package com.mycompany.oficina.ordemservico;
 
 import com.mycompany.oficina.entidades.Carro;
 import com.mycompany.oficina.entidades.Cliente;
+import com.mycompany.oficina.entidades.Entidades;
 import com.mycompany.oficina.entidades.Funcionario;
 import com.mycompany.oficina.loja.Produto;
 import com.mycompany.oficina.ordemservico.ObserverOS.Assunto;
@@ -14,7 +15,7 @@ import java.time.format.DateTimeFormatter; // Importar para formatar a data
 import java.util.ArrayList;
 import java.util.List;
 
-public class OrdemDeServico implements Assunto {
+public class OrdemDeServico implements Assunto, Entidades {
 
     private String numeroOS;
     private static int contadorNumeroOS;
@@ -54,7 +55,7 @@ public class OrdemDeServico implements Assunto {
         return totalPecas + VALOR_MAO_DE_OBRA;
     }
 
-    // 3. MÉTODO PARA GERAR UM EXTRATO COMPLETO E FORMATADO
+    // 3. METODO PARA GERAR UM EXTRATO COMPLETO E FORMATADO
     public String gerarExtrato() {
         StringBuilder extrato = new StringBuilder();
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -118,4 +119,9 @@ public class OrdemDeServico implements Assunto {
     public Cliente getCliente() { return cliente; }
     public Carro getCarro() { return carro; }
     public String getStatusAtual() { return this.estadoAtual.getStatus(); }
+
+    @Override
+    public String getIdentificador() {
+        return this.getNumeroOS();
+    }
 }

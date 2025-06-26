@@ -1,99 +1,109 @@
 package com.mycompany.oficina.sistemaponto;
 
+import com.google.gson.reflect.TypeToken;
 import com.mycompany.oficina.entidades.Funcionario;
+import com.mycompany.oficina.persistencia.PersistenciaJson;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Gerencia o registro de ponto dos funcionários, com persistência de dados integrada.
+ */
 public class GerenciadorPonto {
 
     private final List<RegistroPonto> todosOsRegistros;
+    private final PersistenciaJson persistencia;
 
-    public GerenciadorPonto() {
-        this.todosOsRegistros = new ArrayList<>();
+    /**
+     * Construtor do GerenciadorPonto.
+     * @param persistencia A instância do gerenciador de persistência.
+     */
+    public GerenciadorPonto(PersistenciaJson persistencia) {
+        this.persistencia = persistencia;
+        // Carrega os registros de ponto do arquivo JSON na inicialização
+        this.todosOsRegistros = this.persistencia.carregarLista("pontos", new TypeToken<ArrayList<RegistroPonto>>() {});
     }
 
     /**
-     * Registra a entrada de um funcionário. Cria um novo registro de ponto aberto.
-     *
-     * @param funcionario O funcionário que está batendo o ponto.
+     * Registra a entrada de um funcionário e salva o estado atual.
+     * @param funcionario O funcionário que está a bater o ponto.
      * @return O novo RegistroPonto criado, ou null se ele já tiver um ponto em aberto.
      */
     public RegistroPonto baterPontoEntrada(Funcionario funcionario) {
-        // 1. Primeiro, percorremos TODA a lista para verificar se há um ponto em aberto.
+        // Lógica com for loop para verificar se já existe um ponto em aberto
         boolean pontoEmAberto = false;
         for (RegistroPonto registro : todosOsRegistros) {
             if (registro.getFuncionario().equals(funcionario) && registro.isPontoAberto()) {
-                pontoEmAberto = true; // Se encontrarmos, marcamos como verdadeiro...
-                break;                // ...e paramos a busca.
+                pontoEmAberto = true;
+                break;
             }
         }
 
-        // 2. AGORA, FORA do loop, tomamos a decisão com base no resultado.
         if (pontoEmAberto) {
-            // Se, após verificar a lista inteira, encontrarmos um ponto aberto...
             System.out.println("ERRO: " + funcionario.getNome() + " já possui um registro de ponto em aberto.");
-            return null; // ...então retornamos null e paramos a execução.
+            return null;
         }
 
-        // 3. Se o código chegou até aqui, significa que NENHUM ponto em aberto foi encontrado.
-        // Então, podemos registrar a nova entrada com segurança.
         RegistroPonto novoRegistro = new RegistroPonto(funcionario);
         this.todosOsRegistros.add(novoRegistro);
-        System.out.println("SUCESSO: Ponto de entrada registrado para " + funcionario.getNome() + ".");
-        return novoRegistro; // Retornamos o novo registro criado.
+        System.out.println("SUCESSO: Ponto de entrada registado para " + funcionario.getNome() + ".");
+
+        // Salva a lista atualizada no arquivo JSON imediatamente
+        persistencia.salvarLista("pontos", this.todosOsRegistros);
+
+        return novoRegistro;
     }
 
     /**
-     * Registra a saída de um funcionário, fechando o último ponto em aberto.
-     *
-     * @param funcionario O funcionário que está batendo o ponto.
-     * @return O RegistroPonto atualizado com a hora de saída, ou null se não houver ponto em aberto.
+     * Registra a saída de um funcionário, fecha o último ponto em aberto e salva o estado atual.
+     * @param funcionario O funcionário que está a bater o ponto.
+     * @return O RegistroPonto atualizado, ou null se não houver ponto em aberto.
      */
     public RegistroPonto baterPontoSaida(Funcionario funcionario) {
-        // Encontra o último registro de ponto aberto para o funcionário especificado
-        RegistroPonto registroAberto = null; // 1. Começamos com um objeto nulo
-        for (RegistroPonto registro : todosOsRegistros) { // 2. Passamos por cada registro
-            // 3. Verificamos as mesmas duas condições
+        // Lógica com for loop para encontrar o último registro aberto
+        RegistroPonto registroAberto = null;
+        for (RegistroPonto registro : todosOsRegistros) {
             if (registro.getFuncionario().equals(funcionario) && registro.isPontoAberto()) {
-                registroAberto = registro; // 4. Se encontrarmos, guardamos o objeto
-                break; // 5. E paramos a busca (mesma lógica do findFirst)
+                registroAberto = registro;
+                break;
             }
         }
 
         if (registroAberto != null) {
-            // Não precisamos mais do .get(), usamos o objeto diretamente.
             registroAberto.setDataHoraSaida();
-            System.out.println("SUCESSO: Ponto de saída registrado para " + funcionario.getNome() + ".");
+
+
+            // Salva a lista atualizada no arquivo JSON imediatamente
+            persistencia.salvarLista("pontos", this.todosOsRegistros);
+
             return registroAberto;
         } else {
-            System.out.println("ERRO: Nenhum ponto de entrada em aberto encontrado para " + funcionario.getNome() + ".");
             return null;
         }
     }
 
     /**
-     * Lista todos os registros de ponto de um funcionário específico.
-     *
-     * @param funcionario O funcionário cujos registros devem ser listados.
+     * Lista todos os registos de ponto de um funcionário específico.
+     * @param funcionario O funcionário cujos registos devem ser listados.
      * @return Uma lista de RegistroPonto.
      */
     public List<RegistroPonto> getRegistrosPorFuncionario(Funcionario funcionario) {
-        // 1. Crie uma nova lista vazia para guardar os resultados.
+        // Lógica com for loop para filtrar os registos
         List<RegistroPonto> registrosEncontrados = new ArrayList<>();
-
-        // 2. Percorra cada registro na lista principal de todos os registros.
-        for (RegistroPonto registro : todosOsRegistros) {
-            // 3. Verifique se o funcionário do registro atual é o que estamos procurando.
+        for (RegistroPonto registro : this.todosOsRegistros) {
             if (registro.getFuncionario().equals(funcionario)) {
-                // 4. Se for, adicione este registro à nossa lista de resultados.
                 registrosEncontrados.add(registro);
             }
         }
         return registrosEncontrados;
     }
 
+    /**
+     * Retorna uma cópia de segurança de todos os registos de ponto.
+     * @return Uma nova lista contendo todos os registos.
+     */
     public List<RegistroPonto> getTodosOsRegistros() {
-        return new ArrayList<>(todosOsRegistros);
+        return new ArrayList<>(this.todosOsRegistros);
     }
 }

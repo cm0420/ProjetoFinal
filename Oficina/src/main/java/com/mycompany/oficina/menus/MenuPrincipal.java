@@ -1,4 +1,4 @@
-package com.mycompany.oficina.Menus;
+package com.mycompany.oficina.menus;
 
 import com.mycompany.oficina.agendamento.AgendaOficina;
 import com.mycompany.oficina.controlador.GerenciadorCarros;
@@ -68,7 +68,7 @@ public class MenuPrincipal implements Menu {
         String cargo = Sessao.getInstance().getCargoUsuarioLogado();
         switch (cargo) {
             case "Atendente":
-               Navegador.getInstance().navegarPara(new MenuAtendente(gerenciadorCliente, gerenciadorCarros, gerenciadorFuncionario, agenda, gerenciadorOS));
+               Navegador.getInstance().navegarPara(new MenuAtendente(gerenciadorCliente, gerenciadorCarros, gerenciadorFuncionario, agenda, gerenciadorOS, gerenciadorPonto));
                 break;
             case "Mecanico":
                 Navegador.getInstance().navegarPara(new MenuMecanico(agenda, estoque, gerenciadorOS, gerenciadorPonto));

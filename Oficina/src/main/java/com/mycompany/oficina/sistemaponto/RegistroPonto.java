@@ -30,7 +30,7 @@ public class RegistroPonto {
     }
 
     public void setDataHoraSaida() {
-        this.dataHoraSaida = dataHoraSaida;
+        this.dataHoraSaida = LocalDateTime.now();
     }
     public double getHorasTrabalhadas() {
         if (dataHoraSaida == null) {
@@ -38,7 +38,7 @@ public class RegistroPonto {
         }
         // Calcula a duração entre a entrada e a saída
         Duration duracao = Duration.between(dataHoraEntrada, dataHoraSaida);
-        // Converte a duração para horas (ex: 8.5 para 8 horas e 30 minutos)
+        // Converte a duração para horas (ex: 8.    5 para 8 horas e 30 minutos)
         return duracao.toMinutes() / 60.0;
     }
 
