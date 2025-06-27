@@ -3,11 +3,7 @@ package com.mycompany.oficina.agendamento;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Gerencia a coleção completa de agendamentos da oficina de forma simples e direta.
@@ -143,6 +139,19 @@ public final class AgendaOficina {
         }
 
         return -1; // Horário inválido
+    }
+    public List<Agendamento> listarTodosAgendamentos() {
+        List<Agendamento> todos = new ArrayList<>();
+        // Itera sobre cada array de agendamentos no mapa
+        for (Agendamento[] horariosDoDia : agenda.values()) {
+            // Itera sobre cada agendamento no array do dia
+            for (Agendamento agendamento : horariosDoDia) {
+                if (agendamento != null) {
+                    todos.add(agendamento);
+                }
+            }
+        }
+        return todos;
     }
 
 }

@@ -1,7 +1,8 @@
-package com.mycompany.oficina.gui;
+package com.mycompany.oficina.gui.tela;
 
 import com.mycompany.oficina.controller.GerenteController;
 import com.mycompany.oficina.entidades.Funcionario;
+import com.mycompany.oficina.gui.LoginGUI;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -48,10 +49,10 @@ public class FuncionarioManagerGUI extends Stage {
     }
 
     private void setupTableColumns() {
-        tableView.getColumns().add(TableViewFactory.createColumn("ID", "idUsuario", 80));
-        tableView.getColumns().add(TableViewFactory.createColumn("Nome", "nome", 200));
-        tableView.getColumns().add(TableViewFactory.createColumn("CPF", "cpf", 120));
-        tableView.getColumns().add(TableViewFactory.createColumn("Cargo", "cargo", 100));
+        tableView.getColumns().add(LoginGUI.TableViewFactory.createColumn("ID", "idUsuario", 80));
+        tableView.getColumns().add(LoginGUI.TableViewFactory.createColumn("Nome", "nome", 200));
+        tableView.getColumns().add(LoginGUI.TableViewFactory.createColumn("CPF", "cpf", 120));
+        tableView.getColumns().add(LoginGUI.TableViewFactory.createColumn("Cargo", "cargo", 100));
     }
 
     private void carregarDados() {

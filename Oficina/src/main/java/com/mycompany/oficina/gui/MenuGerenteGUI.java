@@ -1,10 +1,12 @@
 package com.mycompany.oficina.gui;
 
+import com.mycompany.oficina.controller.AtendenteController;
+import com.mycompany.oficina.controller.GerenteController;
+import com.mycompany.oficina.gui.tela.*;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -24,25 +26,36 @@ public class MenuGerenteGUI extends Application {
         Button btnFuncionarios = new Button("Gerenciar Funcionários");
         Button btnFinanceiro = new Button("Módulo Financeiro");
         Button btnEstoque = new Button("Módulo de Estoque");
-        Button btnBaterPonto = new Button("Gerenciar Ponto");
+        Button btnPonto = new Button("Registrar Ponto");
         Button btnSair = new Button("Logout");
 
+        // --- Configuração das Ações dos Botões ---
+
+        // Funções já implementadas
         btnClientes.setOnAction(e -> new ClienteManagerGUI().show());
         btnFuncionarios.setOnAction(e -> new FuncionarioManagerGUI().show());
+        btnVeiculos.setOnAction(e -> new VeiculoManagerGUI().show());
+        btnAgendamentos.setOnAction(e -> new ManagerAgendamentoGUI(new AtendenteController()).show());
 
-        // As funcionalidades restantes podem ser implementadas com o mesmo padrão
-        btnVeiculos.setOnAction(e -> Alerts.showAlert("Aviso", "Funcionalidade não implementada.", Alert.AlertType.INFORMATION));
-        btnAgendamentos.setOnAction(e -> Alerts.showAlert("Aviso", "Funcionalidade não implementada.", Alert.AlertType.INFORMATION));
-        btnFinanceiro.setOnAction(e -> Alerts.showAlert("Aviso", "Funcionalidade não implementada.", Alert.AlertType.INFORMATION));
-        btnEstoque.setOnAction(e -> Alerts.showAlert("Aviso", "Funcionalidade não implementada.", Alert.AlertType.INFORMATION));
-        btnBaterPonto.setOnAction(e -> Alerts.showAlert("Aviso", "Funcionalidade não implementada.", Alert.AlertType.INFORMATION));
+        // ATUALIZADO: Funções do financeiro e ponto
+        btnFinanceiro.setOnAction(e -> new ManagerFinanceiroGUI(new GerenteController()).show());
+        btnEstoque.setOnAction(e -> new ManagerEstoqueGUI().show());
+        btnPonto.setOnAction(e -> new ManagerPontoGUI(new GerenteController()).show());
 
-        btnSair.setOnAction(e -> primaryStage.close());
+        btnSair.setOnAction(e -> {
+            primaryStage.close();
+            // O ideal seria ter uma tela de login para voltar
+            // Application.launch(LoginGUI.class);
+        });
 
-        vbox.getChildren().addAll(btnClientes, btnVeiculos, btnAgendamentos, btnFuncionarios, btnFinanceiro, btnEstoque, btnSair);
-        vbox.getChildren().forEach(node -> ((Button)node).setMaxWidth(Double.MAX_VALUE));
+        vbox.getChildren().addAll(btnClientes, btnVeiculos, btnAgendamentos, btnFuncionarios, btnFinanceiro, btnEstoque, btnPonto, btnSair);
+        vbox.getChildren().forEach(node -> {
+            if (node instanceof Button) {
+                ((Button) node).setMaxWidth(Double.MAX_VALUE);
+            }
+        });
 
-        Scene scene = new Scene(vbox, 300, 380);
+        Scene scene = new Scene(vbox, 300, 420);
         primaryStage.setScene(scene);
         primaryStage.show();
     }

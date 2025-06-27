@@ -9,6 +9,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -102,5 +103,14 @@ public class LoginGUI extends Application {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    public static class TableViewFactory {
+        public static <S, T> TableColumn<S, T> createColumn(String title, String property, double width) {
+            TableColumn<S, T> col = new TableColumn<>(title);
+            col.setCellValueFactory(new PropertyValueFactory<>(property));
+            col.setPrefWidth(width);
+            return col;
+        }
     }
 }

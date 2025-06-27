@@ -1,10 +1,14 @@
 package com.mycompany.oficina.gui;
 
+import com.mycompany.oficina.controller.AtendenteController;
+import com.mycompany.oficina.gui.tela.ClienteManagerGUI;
+import com.mycompany.oficina.gui.tela.ManagerAgendamentoGUI;
+import com.mycompany.oficina.gui.tela.ManagerPontoGUI;
+import com.mycompany.oficina.gui.tela.VeiculoManagerGUI;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -24,16 +28,22 @@ public class MenuAtendenteGUI extends Application {
         Button btnPonto = new Button("Registrar Ponto");
         Button btnSair = new Button("Logout");
 
+        // Ações dos botões
         btnClientes.setOnAction(e -> new ClienteManagerGUI().show());
+        btnVeiculos.setOnAction(e -> new VeiculoManagerGUI().show());
+        btnAgendamentos.setOnAction(e -> new ManagerAgendamentoGUI(new AtendenteController()).show());
 
-        btnVeiculos.setOnAction(e -> Alerts.showAlert("Aviso", "Funcionalidade não implementada.", Alert.AlertType.INFORMATION));
-        btnAgendamentos.setOnAction(e -> Alerts.showAlert("Aviso", "Funcionalidade não implementada.", Alert.AlertType.INFORMATION));
-        btnPonto.setOnAction(e -> Alerts.showAlert("Aviso", "Funcionalidade não implementada.", Alert.AlertType.INFORMATION));
+        // ATUALIZADO: Ação do botão de ponto
+        btnPonto.setOnAction(e -> new ManagerPontoGUI(new AtendenteController()).show());
 
         btnSair.setOnAction(e -> primaryStage.close());
 
         vbox.getChildren().addAll(btnClientes, btnVeiculos, btnAgendamentos, btnPonto, btnSair);
-        vbox.getChildren().forEach(node -> ((Button)node).setMaxWidth(Double.MAX_VALUE));
+        vbox.getChildren().forEach(node -> {
+            if (node instanceof Button) {
+                ((Button) node).setMaxWidth(Double.MAX_VALUE);
+            }
+        });
 
         Scene scene = new Scene(vbox, 300, 280);
         primaryStage.setScene(scene);

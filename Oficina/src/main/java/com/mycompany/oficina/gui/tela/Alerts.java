@@ -1,4 +1,4 @@
-package com.mycompany.oficina.gui;
+package com.mycompany.oficina.gui.tela;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;

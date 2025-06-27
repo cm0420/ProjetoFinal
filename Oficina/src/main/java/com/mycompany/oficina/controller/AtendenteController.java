@@ -158,6 +158,9 @@ public class AtendenteController {
         }
         return agenda.cancelarAgendamento(agendamento);
     }
+    public List<Agendamento> listarTodosAgendamentos() {
+        return agenda.listarTodosAgendamentos();
+    }
 
     // --- LÓGICA DE PONTO ---
 

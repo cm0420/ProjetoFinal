@@ -1,5 +1,8 @@
 package com.mycompany.oficina.gui;
 
+import com.mycompany.oficina.controller.MecanicoController;
+import com.mycompany.oficina.gui.tela.Alerts;
+import com.mycompany.oficina.gui.tela.ManagerPontoGUI;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -22,14 +25,22 @@ public class MenuMecanicoGUI extends Application {
         Button btnRegistrarPonto = new Button("Registrar Ponto");
         Button btnSair = new Button("Logout");
 
-        btnAgendamentos.setOnAction(e -> Alerts.showAlert("Aviso", "Funcionalidade não implementada.", Alert.AlertType.INFORMATION));
-        btnGerenciarOS.setOnAction(e -> Alerts.showAlert("Aviso", "Funcionalidade não implementada.", Alert.AlertType.INFORMATION));
-        btnRegistrarPonto.setOnAction(e -> Alerts.showAlert("Aviso", "Funcionalidade não implementada.", Alert.AlertType.INFORMATION));
+        // ATUALIZADO: Ação do botão de ponto
+        btnRegistrarPonto.setOnAction(e -> new ManagerPontoGUI(new MecanicoController()).show());
+
+        // Ações para OS e Agendamentos ainda precisam ser criadas
+        btnAgendamentos.setOnAction(e -> Alerts.showAlert("Aviso", "Funcionalidade de OS ainda não implementada.", Alert.AlertType.INFORMATION));
+        btnGerenciarOS.setOnAction(e -> Alerts.showAlert("Aviso", "Funcionalidade de OS ainda não implementada.", Alert.AlertType.INFORMATION));
+
 
         btnSair.setOnAction(e -> primaryStage.close());
 
         vbox.getChildren().addAll(btnAgendamentos, btnGerenciarOS, btnRegistrarPonto, btnSair);
-        vbox.getChildren().forEach(node -> ((Button)node).setMaxWidth(Double.MAX_VALUE));
+        vbox.getChildren().forEach(node -> {
+            if (node instanceof Button) {
+                ((Button) node).setMaxWidth(Double.MAX_VALUE);
+            }
+        });
 
         Scene scene = new Scene(vbox, 300, 250);
         primaryStage.setScene(scene);

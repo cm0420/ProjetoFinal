@@ -1,4 +1,4 @@
-package com.mycompany.oficina.gui;
+package com.mycompany.oficina.gui.tela;
 
 import com.mycompany.oficina.entidades.Cliente;
 import javafx.geometry.Insets;

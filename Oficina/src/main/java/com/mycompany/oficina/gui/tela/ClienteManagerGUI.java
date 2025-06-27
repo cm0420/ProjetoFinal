@@ -1,7 +1,8 @@
-package com.mycompany.oficina.gui;
+package com.mycompany.oficina.gui.tela;
 
-import com.mycompany.oficina.controllers.AtendenteController;
+import com.mycompany.oficina.controller.AtendenteController;
 import com.mycompany.oficina.entidades.Cliente;
+import com.mycompany.oficina.gui.LoginGUI;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -49,11 +50,11 @@ public class ClienteManagerGUI extends Stage {
     }
 
     private void setupTableColumns() {
-        tableView.getColumns().add(TableViewFactory.createColumn("ID", "idCliente", 80));
-        tableView.getColumns().add(TableViewFactory.createColumn("Nome", "nome", 200));
-        tableView.getColumns().add(TableViewFactory.createColumn("CPF", "cpf", 120));
-        tableView.getColumns().add(TableViewFactory.createColumn("Telefone", "telefone", 120));
-        tableView.getColumns().add(TableViewFactory.createColumn("Email", "email", 200));
+        tableView.getColumns().add(LoginGUI.TableViewFactory.createColumn("ID", "idCliente", 80));
+        tableView.getColumns().add(LoginGUI.TableViewFactory.createColumn("Nome", "nome", 200));
+        tableView.getColumns().add(LoginGUI.TableViewFactory.createColumn("CPF", "cpf", 120));
+        tableView.getColumns().add(LoginGUI.TableViewFactory.createColumn("Telefone", "telefone", 120));
+        tableView.getColumns().add(LoginGUI.TableViewFactory.createColumn("Email", "email", 200));
     }
 
     private void carregarDados() {
