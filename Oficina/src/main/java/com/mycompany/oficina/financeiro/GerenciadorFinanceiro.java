@@ -94,6 +94,7 @@ public class GerenciadorFinanceiro {
     // --- MÉTODOS DE RELATÓRIOS E BALANÇOS ---
 
     public void emitirRelatorioServicos(LocalDate inicio, LocalDate fim) {
+        // Este metodo já estava correto, focado apenas em serviços.
         System.out.println("\n--- Relatório de Serviços de " + inicio.format(dtf) + " a " + fim.format(dtf) + " ---");
         List<RegistroFinanceiro> servicos = registros.stream()
                 .filter(r -> r.getTipo() == TipoRegistro.RECEITA_SERVICO)
@@ -117,8 +118,9 @@ public class GerenciadorFinanceiro {
                 .mapToDouble(RegistroFinanceiro::getValor)
                 .sum();
 
+
         double despesas = registrosPeriodo.stream()
-                .filter(r -> r.getTipo() == TipoRegistro.DESPESA_SALARIO || r.getTipo() == TipoRegistro.DESPESA_COMISSAO || r.getTipo() == TipoRegistro.DESPESA_PECAS)
+                .filter(r -> r.getTipo() != TipoRegistro.RECEITA_SERVICO && r.getTipo() != TipoRegistro.RECEITA_CANCELAMENTO)
                 .mapToDouble(RegistroFinanceiro::getValor)
                 .sum();
 
@@ -129,11 +131,14 @@ public class GerenciadorFinanceiro {
         System.out.printf("Lucro (Salário do Gerente): R$ %.2f\n", (receitas - despesas));
         System.out.println("----------------------------------------");
     }
+
     public void emitirRelatorioDespesasDetalhado(LocalDate inicio, LocalDate fim) {
         System.out.println("\n--- Relatório Detalhado de Despesas de " + inicio.format(dtf) + " a " + fim.format(dtf) + " ---");
 
+        // --- CORREÇÃO APLICADA AQUI TAMBÉM ---
+        // O filtro agora garante que todas as despesas, incluindo as de peças, sejam listadas.
         List<RegistroFinanceiro> despesasPeriodo = registros.stream()
-                .filter(r -> r.getTipo() != TipoRegistro.RECEITA_SERVICO && r.getTipo() != TipoRegistro.RECEITA_CANCELAMENTO) // Pega apenas despesas
+                .filter(r -> r.getTipo() != TipoRegistro.RECEITA_SERVICO && r.getTipo() != TipoRegistro.RECEITA_CANCELAMENTO)
                 .filter(r -> !r.getData().toLocalDate().isBefore(inicio) && !r.getData().toLocalDate().isAfter(fim))
                 .toList();
 
@@ -142,21 +147,16 @@ public class GerenciadorFinanceiro {
             return;
         }
 
-        // Itera e imprime cada despesa, incluindo salários individuais
         for (RegistroFinanceiro despesa : despesasPeriodo) {
-            System.out.printf("Data: %s | Tipo: %-18s | Valor: R$ %-10.2f | Descrição: %s\n",
+            System.out.printf("Data: %s | Tipo: %-20s | Valor: R$ %-10.2f | Descrição: %s\n",
                     despesa.getData().format(dtf),
-                    despesa.getTipo().name(), // Mostra o tipo (DESPESA_SALARIO, etc)
+                    despesa.getTipo().name(),
                     despesa.getValor(),
-                    despesa.getDescricao() // A descrição já diz "Salário de João", "Comissão de Maria", etc.
+                    despesa.getDescricao()
             );
         }
 
-        // Calcula e imprime o total de despesas no final do relatório
-        double totalDespesas = despesasPeriodo.stream()
-                .mapToDouble(RegistroFinanceiro::getValor)
-                .sum();
-
+        double totalDespesas = despesasPeriodo.stream().mapToDouble(RegistroFinanceiro::getValor).sum();
         System.out.println("----------------------------------------------------------------------------------");
         System.out.printf("Total de Despesas no Período: R$ %.2f\n", totalDespesas);
         System.out.println("----------------------------------------------------------------------------------");

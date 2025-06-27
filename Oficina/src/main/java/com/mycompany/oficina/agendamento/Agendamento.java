@@ -22,6 +22,19 @@ public final class Agendamento {
     private final Funcionario mecanico;
     private final TipoServico tipoServico;
     private final Elevador elevador;
+
+    @Override
+    public String toString() {
+        return "Agendamento{" +
+                "cliente=" + cliente +
+                ", carro=" + carro +
+                ", mecanico=" + mecanico +
+                ", tipoServico=" + tipoServico +
+                ", elevador=" + elevador +
+                ", dataHora=" + dataHora +
+                '}';
+    }
+
     private final LocalDateTime dataHora;
 
     /**

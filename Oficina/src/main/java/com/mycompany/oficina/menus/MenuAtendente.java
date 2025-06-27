@@ -66,7 +66,7 @@ public class MenuAtendente implements Menu {
             System.out.println("1. Gerenciar Clientes");
             System.out.println("2. Gerenciar Veículos");
             System.out.println("3. Gerenciar Agendamentos");
-            System.out.println("4. Registrar Ponto"); // <-- NOVA OPÇÃO
+            System.out.println("4. Registrar Ponto");
             System.out.println("0. Voltar ao Menu Principal (Logout)");
             System.out.print("Escolha uma opção: ");
 
@@ -74,7 +74,7 @@ public class MenuAtendente implements Menu {
                 case "1": menuClientes(); break;
                 case "2": menuVeiculos(); break;
                 case "3": menuAgendamentos(); break;
-                case "4": menuPonto(); break; // <-- CHAMAR NOVO MÉTODO
+                case "4": menuPonto(); break;
                 case "0": executando = false; break;
                 default: System.out.println("Opção inválida.");
             }
@@ -149,6 +149,7 @@ public class MenuAtendente implements Menu {
         System.out.println("2. Consultar Cliente");
         System.out.println("3. Editar Cliente");
         System.out.println("4. Remover Cliente");
+        System.out.println("5. Listar Todos Clientes");
         System.out.println("0. Voltar");
         System.out.print("Escolha uma opção: ");
 
@@ -157,6 +158,7 @@ public class MenuAtendente implements Menu {
             case "2": consultarCliente(null); break;
             case "3": editarCliente(); break;
             case "4": removerCliente(); break;
+            case "5": listarClientes(); break;
             case "0": return;
             default: System.out.println("Opção inválida.");
         }
@@ -170,6 +172,7 @@ public class MenuAtendente implements Menu {
         System.out.println("2. Consultar Veículo");
         System.out.println("3. Editar Veículo");
         System.out.println("4. Remover Veículo");
+        System.out.println("5. Listar Veículos");
         System.out.println("0. Voltar");
         System.out.print("Escolha uma opção: ");
 
@@ -178,6 +181,7 @@ public class MenuAtendente implements Menu {
             case "2": consultarVeiculo(); break;
             case "3": editarVeiculo(); break;
             case "4": removerVeiculo(); break;
+            case "5": listarVeiculos(); break;
             case "0": return;
             default: System.out.println("Opção inválida.");
         }
@@ -190,12 +194,15 @@ public class MenuAtendente implements Menu {
         System.out.println("\n--- Gerenciar Agendamentos ---");
         System.out.println("1. Novo Agendamento");
         System.out.println("2. Consultar / Cancelar Agendamento");
+        System.out.println("3. Editar Agendamento");
+        System.out.println("4. Listar Agendamentos");
         System.out.println("0. Voltar");
         System.out.print("Escolha uma opção: ");
 
         switch (scanner.nextLine()) {
             case "1": agendarServico(); break;
             case "2": consultarEGerenciarAgendamento(); break;
+            case "4": listarAgendamentos(); break;
             case "0": return;
             default: System.out.println("Opção inválida.");
         }
@@ -310,6 +317,27 @@ public class MenuAtendente implements Menu {
             System.out.println("Remoção cancelada.");
         }
     }
+    private void listarClientes() {
+        System.out.println("\n--- Lista de Clientes Cadastrados ---");
+        List<Cliente> clientes = gerenciadorCliente.listarTodos();
+
+        if (clientes.isEmpty()) {
+            System.out.println("Nenhum cliente cadastrado.");
+            return;
+        }
+
+        System.out.println("-------------------------------------------------------------------------");
+        System.out.printf("| %-10s | %-30s | %-20s |\n", "ID Cliente", "Nome", "CPF (Anonimizado)");
+        System.out.println("-------------------------------------------------------------------------");
+
+        for (Cliente cliente : clientes) {
+            System.out.printf("| %-10s | %-30s | %-20s |\n",
+                    cliente.getIdCliente(),
+                    cliente.getNome(),
+                    FormatadorCpf.anonimizar(cliente.getCpf()));
+        }
+        System.out.println("-------------------------------------------------------------------------");
+    }
 
     // --- LÓGICA DE VEÍCULOS ---
 
@@ -410,6 +438,29 @@ public class MenuAtendente implements Menu {
         } else {
             System.out.println("Remoção cancelada.");
         }
+    }
+    private void listarVeiculos() {
+        System.out.println("\n--- Lista de Veículos Cadastrados ---");
+        List<Carro> carros = gerenciadorCarros.listarTodos();
+
+        if (carros.isEmpty()) {
+            System.out.println("Nenhum veículo cadastrado.");
+            return;
+        }
+
+        System.out.println("-------------------------------------------------------------------------------------------------");
+        System.out.printf("| %-20s | %-15s | %-15s | %-10s | %-25s |\n", "Chassi", "Fabricante", "Modelo", "Placa", "Proprietário");
+        System.out.println("-------------------------------------------------------------------------------------------------");
+
+        for (Carro carro : carros) {
+            System.out.printf("| %-20s | %-15s | %-15s | %-10s | %-25s |\n",
+                    carro.getChassi(),
+                    carro.getFabricante(),
+                    carro.getModelo(),
+                    carro.getPlaca(),
+                    carro.getNomeDono());
+        }
+        System.out.println("-------------------------------------------------------------------------------------------------");
     }
 
     // --- LÓGICA DE AGENDAMENTOS ---
@@ -536,5 +587,97 @@ public class MenuAtendente implements Menu {
         } else {
             System.out.println("ERRO: Não foi possível cancelar o agendamento no sistema.");
         }
+    }
+    private Agendamento selecionarAgendamento() {
+        System.out.println("\n--- Buscar Agendamento ---");
+        System.out.print("Digite o CPF do cliente OU a data (dd/MM/yyyy) para buscar: ");
+        String termoBusca = scanner.nextLine();
+
+        Expressao expressaoDeBusca;
+        try {
+            expressaoDeBusca = new ExpressaoPorData(LocalDate.parse(termoBusca, dateFormatter));
+        } catch (DateTimeParseException e) {
+            Cliente cliente = gerenciadorCliente.buscarPorIdentificador(termoBusca.replaceAll("\\D",""));
+            if (cliente == null) {
+                System.out.println("Termo de busca inválido.");
+                return null;
+            }
+            expressaoDeBusca = new ExpressaoPorCliente(cliente);
+        }
+
+        List<Agendamento> resultados = expressaoDeBusca.interpreter(new ContextoDeBusca(agenda));
+        if (resultados.isEmpty()) {
+            System.out.println("Nenhum agendamento encontrado.");
+            return null;
+        }
+
+        System.out.println("Agendamentos encontrados:");
+        for (int i = 0; i < resultados.size(); i++) {
+            Agendamento ag = resultados.get(i);
+            System.out.printf("%d. %s - %s - %s\n", i + 1, ag.getDataHora().format(formatter), ag.getCliente().getNome(), ag.getCarro().getModelo());
+        }
+
+        System.out.print("Escolha um agendamento (ou 0 para voltar): ");
+        int escolha = Integer.parseInt(scanner.nextLine());
+        if (escolha > 0 && escolha <= resultados.size()) {
+            return resultados.get(escolha - 1);
+        }
+        return null;
+    }
+
+    private void editarAgendamento() {
+        Agendamento agendamentoAntigo = selecionarAgendamento();
+        if (agendamentoAntigo == null) {
+            return; // User cancelled or no appointment found
+        }
+
+        System.out.println("\n--- Editando Agendamento ---");
+        System.out.println("Deixe em branco para manter o valor atual.");
+
+        // Editar Data e Hora
+        System.out.print("Nova data e hora (" + agendamentoAntigo.getDataHora().format(formatter) + "): ");
+        String novaDataHoraStr = scanner.nextLine();
+        LocalDateTime novaDataHora = agendamentoAntigo.getDataHora();
+        if (!novaDataHoraStr.isEmpty()) {
+            try {
+                novaDataHora = LocalDateTime.parse(novaDataHoraStr, formatter);
+            } catch (DateTimeParseException e) {
+                System.out.println("ERRO: Formato de data/hora inválido. A data não será alterada.");
+                novaDataHora = agendamentoAntigo.getDataHora();
+            }
+        }
+    }
+    private void listarAgendamentos() {
+        System.out.println("\n--- Lista de Todos os Agendamentos ---");
+
+        // Pega o conjunto de todas as datas que têm agendamentos
+        java.util.Set<LocalDate> datasAgendadas = agenda.getDatasAgendadas();
+
+        if (datasAgendadas.isEmpty()) {
+            System.out.println("Nenhum agendamento encontrado no sistema.");
+            return;
+        }
+
+        System.out.println("-------------------------------------------------------------------------------------------------------");
+        System.out.printf("| %-20s | %-25s | %-20s | %-25s |\n", "Data e Hora", "Cliente", "Veículo (Modelo)", "Serviço");
+        System.out.println("-------------------------------------------------------------------------------------------------------");
+
+        // Itera sobre cada data que possui agendamento
+        for (LocalDate data : datasAgendadas) {
+            // Pega o array de agendamentos para o dia específico
+            Agendamento[] horariosDoDia = agenda.getHorariosDoDia(data);
+            // Itera sobre os horários do dia
+            for (Agendamento agendamento : horariosDoDia) {
+                // Verifica se o slot de horário não está vazio
+                if (agendamento != null) {
+                    System.out.printf("| %-20s | %-25s | %-20s | %-25s |\n",
+                            agendamento.getDataHora().format(formatter),
+                            agendamento.getCliente().getNome(),
+                            agendamento.getCarro().getModelo(),
+                            agendamento.getTipoServico().name());
+                }
+            }
+        }
+        System.out.println("-------------------------------------------------------------------------------------------------------");
     }
 }

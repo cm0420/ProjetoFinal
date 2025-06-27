@@ -36,7 +36,7 @@ public class MenuPrincipal implements Menu {
         this.gerenciadorCarros = gerenciadorCarros;
         this.gerenciadorFuncionario = gerenciadorFuncionario;
         this.gerenciadorPonto = gerenciadorPonto;
-
+        this.gerenciadorFinanceiro = gerenciadorFinanceiro;
     }
 
 
@@ -78,7 +78,7 @@ public class MenuPrincipal implements Menu {
             case "Mecanico":
                 Navegador.getInstance().navegarPara(new MenuMecanico(agenda, estoque, gerenciadorOS, gerenciadorPonto));
                 break;
-            case "Gerente":
+            case "Admin":
                 Navegador.getInstance().navegarPara(new MenuGerente(gerenciadorCliente, gerenciadorCarros, gerenciadorFuncionario, agenda, gerenciadorOS, gerenciadorPonto, this.gerenciadorFinanceiro, estoque));
                 break;
             // Adicionar outros cargos aqui...

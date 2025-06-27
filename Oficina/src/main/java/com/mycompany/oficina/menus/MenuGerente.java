@@ -71,22 +71,22 @@ public class MenuGerente extends MenuAtendente implements Menu {
             switch (scanner.nextLine()) {
                 case "1":
                     super.getMenuClientes();
-                    break;       // Chama o método herdado do MenuAtendente
+                    break;       // Chama o metodo herdado do MenuAtendente
                 case "2":
                     super.getMenuVeiculos();
-                    break;       // Chama o método herdado do MenuAtendente
+                    break;       // Chama o metodo herdado do MenuAtendente
                 case "3":
                     super.getMenuAgendamentos();
-                    break;   // Chama o método herdado do MenuAtendente
+                    break;   // Chama o metodo herdado do MenuAtendente
                 case "4":
                     menuFuncionarios();
-                    break;         // Chama o método local desta classe
+                    break;         // Chama o metodo local desta classe
                 case "5":
                     menuFinanceiro();
-                    break;           // Chama o método local desta classe
+                    break;           // Chama o metodo local desta classe
                 case "6":
                     menuEstoque();
-                    break;              // Chama o método local desta classe
+                    break;              // Chama o metodo local desta classe
                 case "0":
                     executando = false;
                     break;
@@ -104,6 +104,7 @@ public class MenuGerente extends MenuAtendente implements Menu {
         System.out.println("1. Cadastrar Novo Funcionário");
         System.out.println("2. Editar Funcionário");
         System.out.println("3. Remover Funcionário");
+        System.out.println("4. Listar Funcionários");
         System.out.println("0. Voltar");
         System.out.print("Escolha uma opção: ");
 
@@ -117,6 +118,8 @@ public class MenuGerente extends MenuAtendente implements Menu {
             case "3":
                 removerFuncionario();
                 break;
+            case "4":
+                listarFuncionarios();
             case "0":
                 return;
             default:
@@ -162,17 +165,29 @@ public class MenuGerente extends MenuAtendente implements Menu {
 
     private void menuEstoque() {
         System.out.println("\n--- Módulo de Estoque ---");
-        System.out.println("1. Comprar Peças / Repor Estoque");
-        System.out.println("2. Listar Estoque Atual");
+        System.out.println("1. Cadastrar Nova Peça no Sistema");
+        System.out.println("2. Repor Estoque de Peça Existente");
+        System.out.println("3. Listar Estoque Atual");
         System.out.println("0. Voltar");
         System.out.print("Escolha uma opção: ");
 
         switch (scanner.nextLine()) {
             case "1":
-                comprarPecas();
+                cadastrarNovaPeca();
                 break;
             case "2":
-                estoque.listarProdutos();
+                reporEstoque();
+                break;
+            case "3":
+                System.out.println("\n--- Estoque Atual ---");
+                List<Produto> produtos = estoque.listarProdutos();
+                if (produtos.isEmpty()) {
+                    System.out.println("O estoque está vazio.");
+                } else {
+                    produtos.forEach(p ->
+                            System.out.printf("ID: %s | Nome: %s | Qtd: %d | Preço Venda: R$ %.2f\n",
+                                    p.getIdProduto(), p.getNome(), p.getQuantidade(), p.getPreco()));
+                }
                 break;
             case "0":
                 return;
@@ -181,9 +196,12 @@ public class MenuGerente extends MenuAtendente implements Menu {
         }
     }
 
+    /**
+     * NOVO METODO: Para cadastrar um item que não existe no sistema.
+     */
+
 
     // --- LÓGICA DAS NOVAS FUNCIONALIDADES ---
-
     private void cadastrarFuncionario() {
         System.out.println("\n--- Cadastro de Novo Funcionário ---");
         System.out.print("Nome: ");
@@ -224,6 +242,130 @@ public class MenuGerente extends MenuAtendente implements Menu {
             System.out.println("Funcionário removido com sucesso.");
         } else {
             System.out.println("Funcionário não encontrado ou não pode ser removido.");
+        }
+    }
+
+    private void listarFuncionarios() {
+        System.out.println("\n--- Lista de Funcionários Cadastrados ---");
+        List<Funcionario> funcionarios = gerenciadorFuncionario.listarTodos();
+
+        if (funcionarios.isEmpty()) {
+            System.out.println("Nenhum funcionário cadastrado.");
+            return;
+        }
+
+        System.out.println("------------------------------------------------------------");
+        System.out.printf("| %-10s | %-25s | %-15s |\n", "ID Usuário", "Nome", "Cargo");
+        System.out.println("------------------------------------------------------------");
+
+        for (Funcionario f : funcionarios) {
+            System.out.printf("| %-10s | %-25s | %-15s |\n",
+                    f.getIdUsuario(),
+                    f.getNome(),
+                    f.getCargo());
+        }
+        System.out.println("------------------------------------------------------------");
+    }
+
+    private void cadastrarNovaPeca() {
+        System.out.println("\n--- Cadastro de Nova Peça ---");
+        try {
+            System.out.print("Nome da nova peça: ");
+            String nome = scanner.nextLine();
+
+            System.out.print("Preço de VENDA final para o cliente: R$ ");
+            double precoVenda = Double.parseDouble(scanner.nextLine());
+
+            System.out.print("Quantidade inicial a ser comprada: ");
+            int quantidade = Integer.parseInt(scanner.nextLine());
+
+            System.out.print("Nome do Fornecedor: ");
+            String fornecedor = scanner.nextLine();
+
+            // Regra de negócio: preço de compra é 15 reais mais barato
+            double precoCompraUnidade = precoVenda - 15.00;
+            if (precoCompraUnidade < 0) precoCompraUnidade = 0; // Segurança para não ter preço negativo
+            double custoTotal = precoCompraUnidade * quantidade;
+
+            System.out.println("\n--- Resumo da Compra ---");
+            System.out.printf("Peça: %s | Fornecedor: %s\n", nome, fornecedor);
+            System.out.printf("Preço de Venda Definido: R$ %.2f\n", precoVenda);
+            System.out.printf("Preço de Compra (por unidade): R$ %.2f\n", precoCompraUnidade);
+            System.out.printf("Quantidade: %d\n", quantidade);
+            System.out.println("---------------------------------");
+            System.out.printf("CUSTO TOTAL DA COMPRA: R$ %.2f\n", custoTotal);
+            System.out.println("---------------------------------");
+
+            System.out.print("Confirmar cadastro e registrar despesa? (S/N): ");
+            if (scanner.nextLine().equalsIgnoreCase("S")) {
+                Produto novoProduto = new Produto(nome, precoVenda, quantidade, fornecedor);
+                estoque.cadastrarProduto(novoProduto); // O cadastrar já salva no JSON
+
+                String nota = "Compra inicial de " + quantidade + "x " + nome;
+                gerenciadorFinanceiro.registrarDespesaCompraPecas(nota, custoTotal);
+                System.out.println("Peça cadastrada, estoque atualizado e despesa registrada com sucesso!");
+            } else {
+                System.out.println("Cadastro cancelado.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Erro: Preço ou quantidade inválida. Use apenas números.");
+        }
+    }
+
+    /**
+     * Método para adicionar mais unidades a uma peça que já existe.
+     */
+    private void reporEstoque() {
+        System.out.println("\n--- Reposição de Estoque ---");
+        List<Produto> pecasDisponiveis = estoque.listarProdutos();
+        if (pecasDisponiveis.isEmpty()) {
+            System.out.println("Nenhuma peça cadastrada no sistema. Use a opção 'Cadastrar Nova Peça' primeiro.");
+            return;
+        }
+
+        try {
+            System.out.println("Peças disponíveis para reposição:");
+            for (int i = 0; i < pecasDisponiveis.size(); i++) {
+                Produto p = pecasDisponiveis.get(i);
+                System.out.printf("%d. %s (Estoque atual: %d)\n", i + 1, p.getNome(), p.getQuantidade());
+            }
+
+            System.out.print("Escolha a peça para repor (pelo número): ");
+            int pecaIndex = Integer.parseInt(scanner.nextLine()) - 1;
+            Produto pecaSelecionada = pecasDisponiveis.get(pecaIndex);
+
+            System.out.print("Digite a quantidade a ser comprada: ");
+            int quantidade = Integer.parseInt(scanner.nextLine());
+            if (quantidade <= 0) {
+                System.out.println("Quantidade deve ser positiva.");
+                return;
+            }
+
+            double precoCompraUnidade = pecaSelecionada.getPreco() - 15.00;
+            if (precoCompraUnidade < 0) precoCompraUnidade = 0;
+            double custoTotal = precoCompraUnidade * quantidade;
+
+            System.out.println("\n--- NOTA FISCAL DE REPOSIÇÃO ---");
+            System.out.printf("Peça: %s\n", pecaSelecionada.getNome());
+            System.out.printf("Preço de Compra (unidade): R$ %.2f\n", precoCompraUnidade);
+            System.out.printf("Quantidade a Adicionar: %d\n", quantidade);
+            System.out.println("---------------------------------");
+            System.out.printf("CUSTO TOTAL DA REPOSIÇÃO: R$ %.2f\n", custoTotal);
+            System.out.println("---------------------------------");
+
+            System.out.print("Confirmar reposição e registrar despesa? (S/N): ");
+            if (scanner.nextLine().equalsIgnoreCase("S")) {
+                pecaSelecionada.setQuantidade(pecaSelecionada.getQuantidade() + quantidade);
+                estoque.salvarEstoque(); // Salva o estoque após a alteração
+
+                String nota = "Reposição de " + quantidade + "x " + pecaSelecionada.getNome();
+                gerenciadorFinanceiro.registrarDespesaCompraPecas(nota, custoTotal);
+                System.out.println("Reposição realizada e despesa registrada com sucesso!");
+            } else {
+                System.out.println("Reposição cancelada.");
+            }
+        } catch (NumberFormatException | IndexOutOfBoundsException e) {
+            System.out.println("Erro: Escolha ou quantidade inválida.");
         }
     }
 

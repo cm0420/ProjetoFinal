@@ -144,4 +144,5 @@ public final class AgendaOficina {
 
         return -1; // Horário inválido
     }
+
 }

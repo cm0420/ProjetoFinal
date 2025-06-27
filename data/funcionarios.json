@@ -18,5 +18,15 @@
     "telefone": "12345678911",
     "endereco": "N/A",
     "email": "luiz@gmail.com"
+  },
+  {
+    "idUsuario": "User-001",
+    "senha": "admin1",
+    "cargo": "Admin",
+    "nome": "Maria",
+    "cpf": "12345678910",
+    "telefone": "14785296332",
+    "endereco": "N/A",
+    "email": "maria@gmail.com"
   }
 ]
