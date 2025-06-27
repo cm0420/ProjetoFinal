@@ -15,6 +15,7 @@ import com.mycompany.oficina.entidades.Funcionario;
 
 import java.time.LocalDateTime;
 
+import com.mycompany.oficina.gui.LoginGUI;
 import com.mycompany.oficina.menus.MenuPrincipal;
 import com.mycompany.oficina.menus.Navegador;
 import com.mycompany.oficina.loja.Estoque;
@@ -23,7 +24,7 @@ import com.mycompany.oficina.ordemservico.GerenciadorOrdemDeServico;
 import com.mycompany.oficina.seguranca.ServicoAutenticacao;
 import com.mycompany.oficina.seguranca.*;
 import com.mycompany.oficina.sistemaponto.GerenciadorPonto;
-
+import javafx.application.Application;
 import java.util.Scanner;
 
 /**
@@ -31,7 +32,8 @@ import java.util.Scanner;
  */
 public class Oficina {
     public static void main(String[] args) {
-        OficinaAplicattion.getInstance().run();
+        OficinaAplicattion.getInstance().verificarECriarAdminPadrao();
+        Application.launch(LoginGUI.class, args);
     }
 }
 

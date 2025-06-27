@@ -1,0 +1,14 @@
+[
+  {
+    "descricao": "Reposição de 50x Filtro de Oleo",
+    "valor": 1000.0,
+    "tipo": "DESPESA_PECAS",
+    "data": "2025-06-26T23:33:02.5969244"
+  },
+  {
+    "descricao": "Salário de Luiz",
+    "valor": 1500.0,
+    "tipo": "DESPESA_SALARIO",
+    "data": "2025-06-27T00:23:07.302996"
+  }
+]
