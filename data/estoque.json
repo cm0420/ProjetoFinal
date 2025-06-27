@@ -1,0 +1,9 @@
+[
+  {
+    "idProduto": "PR-001",
+    "nome": "Filtro de Oleo",
+    "preco": 35.0,
+    "quantidade": 50,
+    "fornecedor": "Marca Do Zezin"
+  }
+]
