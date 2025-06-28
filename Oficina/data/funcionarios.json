@@ -8,5 +8,15 @@
     "telefone": "00000000000",
     "endereco": "N/A",
     "email": "admin@oficina.com"
+  },
+  {
+    "idUsuario": "User-002",
+    "senha": "123",
+    "cargo": "Mecanico",
+    "nome": "Miguel",
+    "cpf": "12345678911",
+    "telefone": "12345698711",
+    "endereco": "n/a",
+    "email": "miguel@gmail.com"
   }
 ]

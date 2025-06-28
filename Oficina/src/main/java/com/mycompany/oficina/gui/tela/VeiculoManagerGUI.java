@@ -4,6 +4,7 @@ import com.mycompany.oficina.controller.AtendenteController;
 import com.mycompany.oficina.entidades.Carro;
 import com.mycompany.oficina.entidades.Cliente;
 import com.mycompany.oficina.gui.LoginGUI;
+import com.mycompany.oficina.gui.LoginGUI.TableViewFactory;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
