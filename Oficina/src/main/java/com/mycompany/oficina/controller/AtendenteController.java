@@ -72,7 +72,7 @@ public class AtendenteController {
         String enderecoFinal = (novoEndereco == null || novoEndereco.isEmpty()) ? cliente.getEndereco() : novoEndereco;
         String emailFinal = (novoEmail == null || novoEmail.isEmpty()) ? cliente.getEmail() : novoEmail;
 
-        return gerenciadorCliente.editarCliente(nomeFinal, cpfAntigo, cpfFinal, telefoneFinal, enderecoFinal, emailFinal);
+        return gerenciadorCliente.editarCliente(nomeFinal, cpfAntigo, telefoneFinal, enderecoFinal, emailFinal);
     }
 
     public boolean removerCliente(String cpf) {

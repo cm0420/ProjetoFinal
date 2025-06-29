@@ -33,7 +33,7 @@ public class OficinaAplicattion {
         this.gerenciadorOS = new GerenciadorOrdemDeServico(persistencia);
         this.gerenciadorPonto = new GerenciadorPonto(persistencia);
         this.gerenciadorFinanceiro = GerenciadorFinanceiro.getInstance(persistencia);
-        this.agenda = new AgendaOficina();
+        this.agenda = new AgendaOficina(persistencia);
         this.estoque = new Estoque(persistencia);
         this.servicoAutenticacao = new ServicoAutenticacao(gerenciadorFuncionario);
     }

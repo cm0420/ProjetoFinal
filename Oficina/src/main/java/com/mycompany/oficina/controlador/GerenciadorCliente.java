@@ -25,12 +25,11 @@ public class GerenciadorCliente extends GerenciadorGenerico<Cliente> {
         return cliente;
     }
 
-    public boolean editarCliente(String novoNome, String cpf, String novoCpf, String novoTelefone, String novoEndereco, String novoEmail) {
+    public boolean editarCliente(String novoNome, String cpf,  String novoTelefone, String novoEndereco, String novoEmail) {
         Cliente clienteEditar = this.buscarPorIdentificador(cpf);
         if (clienteEditar != null) {
 
             clienteEditar.setNome(novoNome);
-            clienteEditar.setCpf(novoCpf);
             clienteEditar.setTelefone(novoTelefone);
             clienteEditar.setEndereco(novoEndereco);
             clienteEditar.setEmail(novoEmail);

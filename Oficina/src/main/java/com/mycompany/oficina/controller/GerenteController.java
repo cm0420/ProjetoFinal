@@ -51,7 +51,7 @@ public class GerenteController extends AtendenteController {
         String endFinal = (novoEndereco == null || novoEndereco.isEmpty()) ? f.getEndereco() : novoEndereco;
         String emailFinal = (novoEmail == null || novoEmail.isEmpty()) ? f.getEmail() : novoEmail;
 
-        return gerenciadorFuncionario.editarFuncionario(cpf, cpfFinal, senhaFinal, cargoFinal, nomeFinal, telFinal, endFinal, emailFinal);
+        return gerenciadorFuncionario.editarFuncionario(cpf, senhaFinal, cargoFinal, nomeFinal, telFinal, endFinal, emailFinal);
     }
 
     public boolean removerFuncionario(String cpf) {

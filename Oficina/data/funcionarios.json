@@ -1,22 +1,32 @@
 [
   {
-    "idUsuario": "User-001",
-    "senha": "admin",
-    "cargo": "Admin",
-    "nome": "Administrador do Sistema",
-    "cpf": "00000000000",
-    "telefone": "00000000000",
+    "idUsuario": "User-006",
+    "senha": "1234",
+    "cargo": "Atendente",
+    "nome": "Maria",
+    "cpf": "1234567810",
+    "telefone": "1234567810",
     "endereco": "N/A",
-    "email": "admin@oficina.com"
+    "email": "maria@vieira.com"
+  },
+  {
+    "idUsuario": "User-008",
+    "senha": "1234",
+    "cargo": "Mecanico",
+    "nome": "Tadeu",
+    "cpf": "12345678901",
+    "telefone": "12345678911",
+    "endereco": "N/A",
+    "email": "miguel@gmail.com"
   },
   {
     "idUsuario": "User-002",
-    "senha": "123",
-    "cargo": "Mecanico",
+    "senha": "1234",
+    "cargo": "Admin",
     "nome": "Miguel",
-    "cpf": "12345678911",
-    "telefone": "12345698711",
-    "endereco": "n/a",
+    "cpf": "08654388625",
+    "telefone": "12345678910",
+    "endereco": "na",
     "email": "miguel@gmail.com"
   }
 ]

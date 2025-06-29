@@ -1,27 +1,19 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- */
 package com.mycompany.oficina;
 
-
 import com.mycompany.oficina.application.OficinaAplicattion;
+import com.mycompany.oficina.gui.*; // MUDANÇA AQUI
+import com.mycompany.oficina.gui.menus.LoginSwing;
 
+import javax.swing.SwingUtilities;
 
-
-
-import com.mycompany.oficina.gui.LoginGUI;
-
-import javafx.application.Application;
-
-
-/**
- * @author Miguel
- */
 public class Oficina {
     public static void main(String[] args) {
+        // Garante que a aplicação inicie de forma segura
         OficinaAplicattion.getInstance().verificarECriarAdminPadrao();
-        Application.launch(LoginGUI.class, args);
+
+        // Inicia a interface gráfica Swing na thread de eventos apropriada
+        SwingUtilities.invokeLater(() -> {
+            new LoginSwing().setVisible(true);
+        });
     }
 }
-
-

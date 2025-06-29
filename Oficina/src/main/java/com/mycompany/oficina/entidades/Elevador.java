@@ -28,7 +28,8 @@ public class Elevador {
     // as informações dos 3 elevadores da oficina.
     private static final Elevador[] elevadores = new Elevador[3];
 
-    // Inicializa os elevadores automaticamente na carga da classe
+  //Questão 5- O sistema deverá armazenar de forma estática
+  // (Vetor com tamanho fixo) as informações dos 3 elevadores da oficina.
     static {
         elevadores[0] = new Elevador(1, "Elevador Alinhamento e Balanceamento", true);
         elevadores[1] = new Elevador(2, "Elevador 2", true);

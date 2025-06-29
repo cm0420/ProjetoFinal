@@ -26,14 +26,13 @@ public class GerenciadorFuncionario extends GerenciadorGenerico<Funcionario> {
         return novoFuncionario;
     }
 
-    public boolean editarFuncionario(String cpf, String novoCpf, String novaSenha, String novoCargo, String novoNome, String novoTelefone, String novoEndereco, String novoEmail) {
+    public boolean editarFuncionario(String cpf, String novaSenha, String novoCargo, String novoNome, String novoTelefone, String novoEndereco, String novoEmail) {
         Funcionario funcionarioParaEditar = this.buscarPorIdentificador(cpf);
 
         if (funcionarioParaEditar != null) {
             funcionarioParaEditar.setSenha(novaSenha);
             funcionarioParaEditar.setCargo(novoCargo);
             funcionarioParaEditar.setNome(novoNome);
-            funcionarioParaEditar.setCpf(novoCpf);
             funcionarioParaEditar.setTelefone(novoTelefone);
             funcionarioParaEditar.setEndereco(novoEndereco);
             funcionarioParaEditar.setEmail(novoEmail);

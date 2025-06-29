@@ -1,40 +1,48 @@
 package com.mycompany.oficina.agendamento;
 
+import com.google.gson.reflect.TypeToken; // IMPORTAR ISTO
+import com.mycompany.oficina.persistencia.PersistenciaJson; // IMPORTAR ISTO
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-/**
- * Gerencia a coleção completa de agendamentos da oficina de forma simples e direta.
- * <p>
- * Esta versão utiliza um Mapa para associar uma data a um vetor de horários,
- * tornando a lógica mais clara, eficiente e eliminando a necessidade de uma
- * classe DiaAgenda intermediária.
- */
 public final class AgendaOficina {
 
     private final int horaInicioManha = 8;
-    private final int horaFimManha = 12; // Os horários vão até 11:59
+    private final int horaFimManha = 12;
     private final int horaInicioTarde = 14;
-    private final int horaFimTarde = 18; // Os horários vão até 17:59
-
+    private final int horaFimTarde = 18;
     private final int totalDeHorarios;
 
     // A estrutura de dados principal agora é um Mapa.
-    // Chave: LocalDate (a data da "página" da agenda)
-    // Valor: Agendamento[] (o vetor de horários daquele dia)
-    private final Map<LocalDate, Agendamento[]> agenda;
+    private Map<LocalDate, Agendamento[]> agenda; // Removido o 'final' para poder carregar do arquivo
+
+    // --- NOVOS ATRIBUTOS PARA PERSISTÊNCIA ---
+    private final PersistenciaJson persistencia;
+    private final String CHAVE_ARQUIVO = "agenda";
 
     /**
-     * Construtor que inicializa a agenda.
+     * Construtor que inicializa a agenda e integra a persistência.
      */
-    public AgendaOficina() {
+    public AgendaOficina(PersistenciaJson persistencia) {
         // Calcula o total de slots disponíveis
-        int slotsManha = horaFimManha - horaInicioManha; // 12 - 8 = 4 slots
-        int slotsTarde = horaFimTarde - horaInicioTarde; // 18 - 14 = 4 slots
+        int slotsManha = horaFimManha - horaInicioManha;
+        int slotsTarde = horaFimTarde - horaInicioTarde;
         this.totalDeHorarios = slotsManha + slotsTarde;
-        this.agenda = new HashMap<>();
+
+        // --- LÓGICA DE PERSISTÊNCIA ---
+        this.persistencia = persistencia;
+        // Carrega o mapa do arquivo JSON. Se não existir, cria um novo.
+        this.agenda = this.persistencia.carregarMapa(CHAVE_ARQUIVO, new TypeToken<HashMap<LocalDate, Agendamento[]>>() {});
+        if (this.agenda == null) {
+            this.agenda = new HashMap<>();
+        }
+    }
+
+    // --- NOVO MÉTODO PARA SALVAR ---
+    private void salvarAgenda() {
+        this.persistencia.salvarMapa(CHAVE_ARQUIVO, this.agenda);
     }
 
     /**
@@ -51,19 +59,21 @@ public final class AgendaOficina {
         }
 
         LocalDate data = dataHora.toLocalDate();
-        Agendamento[] horariosDoDia = agenda.get(data);
-        if (horariosDoDia == null) {
-            horariosDoDia = new Agendamento[this.totalDeHorarios];
-            agenda.put(data, horariosDoDia);
-        }
+        // getOrDefault garante que um novo array seja criado se for o primeiro agendamento do dia
+        Agendamento[] horariosDoDia = agenda.getOrDefault(data, new Agendamento[this.totalDeHorarios]);
+
         if (horariosDoDia[indice] != null) {
             return false;
         }
 
         horariosDoDia[indice] = agendamento;
-        System.out.println("SUCESSO: Agendamento realizado para " + data);
+        agenda.put(data, horariosDoDia); // Garante que o mapa seja atualizado
+
+        salvarAgenda(); // <--- PONTO CRÍTICO: SALVA AS ALTERAÇÕES
+        System.out.println("SUCESSO: Agendamento realizado e salvo para " + data);
         return true;
     }
+
     public boolean cancelarAgendamento(Agendamento agendamento) {
         if (agendamento == null) {
             return false;
@@ -71,50 +81,28 @@ public final class AgendaOficina {
 
         LocalDateTime dataHora = agendamento.getDataHora();
         LocalDate data = dataHora.toLocalDate();
-
-        // Pega o array de horários para o dia do agendamento
         Agendamento[] horariosDoDia = agenda.get(data);
+
         if (horariosDoDia == null) {
-            // Se não há agendamentos para este dia, não há o que cancelar.
             return false;
         }
 
         int indice = converterHoraParaIndice(dataHora);
         if (indice == -1 || horariosDoDia[indice] == null) {
-            // Se o horário é inválido ou já está vago, não há o que cancelar.
             return false;
         }
 
-        // Confirma se o agendamento na agenda é exatamente o mesmo que queremos remover
         if (horariosDoDia[indice].equals(agendamento)) {
-            horariosDoDia[indice] = null; // Remove o agendamento, definindo o slot como nulo
-            return true; // Sucesso!
+            horariosDoDia[indice] = null;
+            salvarAgenda(); // <--- PONTO CRÍTICO: SALVA AS ALTERAÇÕES
+            return true;
         }
 
-        return false; // O agendamento encontrado não era o esperado
+        return false;
     }
 
-    /**
-     * Busca um agendamento específico em uma data e hora.
-     * @return O agendamento encontrado, ou null se o horário estiver vago.
-     */
-    public Agendamento buscarAgendamento(LocalDateTime dataHora){
-        Agendamento[] horariosDoDia = agenda.get(dataHora.toLocalDate());
-        if (horariosDoDia == null) {
-            return null;
-        }
-        int indice = converterHoraParaIndice(dataHora);
-        if (indice == -1) {
-            return null;
-        }
-        return horariosDoDia[indice];
-    }
+    // O restante da classe (getHorariosDoDia, getDatasAgendadas, etc.) permanece igual...
 
-    /**
-     * Retorna os horários de um dia específico.
-     * @param data A data a ser consultada.
-     * @return Uma cópia do vetor de agendamentos para o dia.
-     */
     public Agendamento[] getHorariosDoDia(LocalDate data) {
         Agendamento[] horariosOriginais = agenda.get(data);
         if (horariosOriginais == null) {
@@ -122,6 +110,7 @@ public final class AgendaOficina {
         }
         return Arrays.copyOf(horariosOriginais, horariosOriginais.length);
     }
+
     public Set<LocalDate> getDatasAgendadas() {
         return Collections.unmodifiableSet(agenda.keySet());
     }
@@ -138,13 +127,12 @@ public final class AgendaOficina {
             return (hora - horaInicioTarde) + slotsManha;
         }
 
-        return -1; // Horário inválido
+        return -1;
     }
+
     public List<Agendamento> listarTodosAgendamentos() {
         List<Agendamento> todos = new ArrayList<>();
-        // Itera sobre cada array de agendamentos no mapa
         for (Agendamento[] horariosDoDia : agenda.values()) {
-            // Itera sobre cada agendamento no array do dia
             for (Agendamento agendamento : horariosDoDia) {
                 if (agendamento != null) {
                     todos.add(agendamento);
@@ -153,5 +141,4 @@ public final class AgendaOficina {
         }
         return todos;
     }
-
 }
